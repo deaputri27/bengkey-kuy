@@ -1,4 +1,4 @@
-class partControllers {
+class PartControllers {
     static register(req, res, next) {
         try {
             
@@ -27,3 +27,5 @@ class partControllers {
     }
 
 }
+
+module.exports = PartControllers
