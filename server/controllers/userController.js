@@ -1,23 +1,25 @@
 const { comparePassword } = require('../helper/bcrypt')
 const { signToken } = require('../helper/jwt')
-const {User} = require('../models')
+const { User, OrderDetail, Product } = require("../models")
 
 // const { OAuth2Client } = require('google-auth-library');
+const midtransClient = require('midtrans-client');
+
 
 class UserController {
     static async register(req, res, next) {
         try {
-        const {username, email, password, phoneNumber} = req.body
-        const createUser = await User.create({
-            username,
-            email,
-            password,
-            phoneNumber
-        })
-        res.status(201).json({message: `user with id ${createUser.id} and email ${createUser.email} has been created`})
-        // console.log(createUser, "<<<")
+            const { username, email, password, phoneNumber } = req.body
+            const createUser = await User.create({
+                username,
+                email,
+                password,
+                phoneNumber
+            })
+            res.status(201).json({ message: `user with id ${createUser.id} and email ${createUser.email} has been created` })
+            // console.log(createUser, "<<<")
         } catch (error) {
-            next(error);
+            // next(error);
             console.log(error);
         }
     }
@@ -25,31 +27,31 @@ class UserController {
     static async login(req, res, next) {
         try {
             const { email, password } = req.body
-        if (!email || !password) {
-            throw {name : "Invalid email/password" }
-        } // ini juga belum di handle di error handler
-        const user = await User.findOne({ where: { email } })
-        // console.log(user);
-        if (!user) {
-            res.status(401).json({ message: "InvalidToken" })
-            return
-        }
-        const isValidPassword = comparePassword(password, user.password)
-        if (!isValidPassword) {
-            res.status(401).json({
-                message: "InvalidToken"
-            }) // ini juga
-            return
-        }
-        const access_token = signToken({
-            id: user.id,
-            email: user.email
-        })
-        // console.log(access_token, "<<<<fyfy");
-        res.json({
-            access_token,
-            email,
-        })
+            if (!email || !password) {
+                throw { name: "Invalid email/password" }
+            } // ini juga belum di handle di error handler
+            const user = await User.findOne({ where: { email } })
+            // console.log(user);
+            if (!user) {
+                res.status(401).json({ message: "InvalidToken" })
+                return
+            }
+            const isValidPassword = comparePassword(password, user.password)
+            if (!isValidPassword) {
+                res.status(401).json({
+                    message: "InvalidToken"
+                }) // ini juga
+                return
+            }
+            const access_token = signToken({
+                id: user.id,
+                email: user.email
+            })
+            // console.log(access_token, "<<<<fyfy");
+            res.json({
+                access_token,
+                email,
+            })
         } catch (error) {
             next(error);
             console.log(error, "<<err");
@@ -86,6 +88,73 @@ class UserController {
     //         console.log(error);
     //     }
     // }
+
+    static async generateMidtransToken(req, res, next) {
+        try {
+            const findUser = await User.findByPk(req.user.id)
+            // if (findUser.isSubscribed) {
+            //     throw { name: "already_subscribed" }
+            // }
+            
+            let snap = new midtransClient.Snap({
+                isProduction: false,
+                serverKey: process.env.MIDTRANS_SERVER_KEY,
+            });
+
+            const myProducts = await OrderDetail.findAll({
+                attributes: {
+                    exclude: ['createdAt', 'updatedAt']
+                }, include: {
+                    model: Product,
+                },
+                where: { orderId: 1 }
+            })
+            // res.status(201).json(myProducts[0])
+            // console.log(myProducts[0], ">>>>>>>>>>>>>>>>");
+
+            let totalPrice = 0
+            for (let i = 0; i < myProducts.length; i++) {
+                let price = myProducts[i].Product.price * myProducts[i].quantity
+                totalPrice += price
+
+            }
+            // console.log(total);
+
+            let items = []
+            myProducts.forEach(el => {
+                let obj = {}
+                obj.id = el.productId
+                obj.price = el.Product.price
+                obj.quantity = el.quantity
+                obj.name = el.Product.productName
+                items.push(obj)
+            });
+        
+            let parameter = {
+                "transaction_details": {
+                    "order_id": "TRANSACTION_" + Math.floor(1000000 + Math.random() * 9000000),
+                    "gross_amount": totalPrice
+                },
+                "credit_card": {
+                    "secure": true
+                },
+                "customer_details": {
+                    // "first_name": "budi",
+                    // "last_name": "pratama",
+                    "email": findUser.email,
+                    "phone": findUser.phoneNumber
+                },
+                "item_details": items
+            };
+
+            const midtransToken = await snap.createTransaction(parameter)
+            // console.log(midtransToken, ">>>>>>>>>>");
+            res.status(201).json(midtransToken)
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
 }
 
