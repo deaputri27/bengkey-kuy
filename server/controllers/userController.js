@@ -1,6 +1,7 @@
 const { comparePassword } = require('../helper/bcrypt')
 const { signToken } = require('../helper/jwt')
-const { User, Review } = require('../models')
+const midtransClient = require('midtrans-client');
+const {User, Order, OrderDetail, Review, Product} = require('../models')
 
 const { OAuth2Client } = require('google-auth-library');
 
@@ -17,7 +18,7 @@ class UserController {
             res.status(201).json({ message: `user with id ${createUser.id} and email ${createUser.email} has been created` })
             // console.log(createUser, "<<<")
         } catch (error) {
-            next(error);
+            // next(error);
             console.log(error);
         }
     }
@@ -29,7 +30,6 @@ class UserController {
                 throw { name: "Invalid email/password" }
             }
             const user = await User.findOne({ where: { email } })
-
             if (!user) {
                 res.status(401).json({ message: "InvalidToken" })
                 return
@@ -105,6 +105,120 @@ class UserController {
         } catch (err) {
             // next(err)
             console.log(err);
+        }
+    }
+
+    static async getReview(req, res, next) {
+        try {
+            const {id} = req.params
+            const review = await Review.findAll({
+                where: { partnerId: id }
+            })
+
+            res.status(200).json(review)
+        } catch (err) {
+            next(err)
+        }
+    }
+
+    static async createOrder(req, res, next){
+        try {
+            const {problem, lat, lng, car, carType, license} = req.body
+            const location = `POINT(${lat} ${lng})`
+            console.log(req.body);
+            const response = Order.create({problem, location, car, carType, license})
+            res.status(201).json(response)
+        } catch (err) {
+            console.log(err);
+            next(err)
+        }
+    }
+
+
+    static async getOrderDetail(req, res, next){
+        try {
+            const{id} = req.params
+            const response = await OrderDetail.findByPk(id)
+            console.log(response);
+            res.status(200).json(response)
+        } catch (err) {
+            console.log(err);
+            next(err)
+        }
+    }
+
+    static async updateStatus(req, res, next){
+        try {
+            
+        } catch (err) {
+            next(err)
+        }
+    }
+
+    static async generateMidtransToken(req, res, next) {
+        try {
+            const findUser = await User.findByPk(req.user.id)
+            // if (findUser.isSubscribed) {
+            //     throw { name: "already_subscribed" }
+            // }
+            
+            let snap = new midtransClient.Snap({
+                isProduction: false,
+                serverKey: process.env.MIDTRANS_SERVER_KEY,
+            });
+
+            const myProducts = await OrderDetail.findAll({
+                attributes: {
+                    exclude: ['createdAt', 'updatedAt']
+                }, include: {
+                    model: Product,
+                },
+                where: { orderId: 1 }
+            })
+            // res.status(201).json(myProducts[0])
+            // console.log(myProducts[0], ">>>>>>>>>>>>>>>>");
+
+            let totalPrice = 0
+            for (let i = 0; i < myProducts.length; i++) {
+                let price = myProducts[i].Product.price * myProducts[i].quantity
+                totalPrice += price
+
+            }
+            // console.log(total);
+
+            let items = []
+            myProducts.forEach(el => {
+                let obj = {}
+                obj.id = el.productId
+                obj.price = el.Product.price
+                obj.quantity = el.quantity
+                obj.name = el.Product.productName
+                items.push(obj)
+            });
+        
+            let parameter = {
+                "transaction_details": {
+                    "order_id": "TRANSACTION_" + Math.floor(1000000 + Math.random() * 9000000),
+                    "gross_amount": totalPrice
+                },
+                "credit_card": {
+                    "secure": true
+                },
+                "customer_details": {
+                    // "first_name": "budi",
+                    // "last_name": "pratama",
+                    "email": findUser.email,
+                    "phone": findUser.phoneNumber
+                },
+                "item_details": items
+            };
+
+            const midtransToken = await snap.createTransaction(parameter)
+            // console.log(midtransToken, ">>>>>>>>>>");
+            res.status(201).json(midtransToken)
+
+        } catch (error) {
+            console.log(error);
         }
     }
 
