@@ -113,9 +113,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace 'com.bimaandika.clientuser'
+    namespace 'com.tama13.clientuser'
     defaultConfig {
-        applicationId 'com.bimaandika.clientuser'
+        applicationId 'com.tama13.clientuser'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

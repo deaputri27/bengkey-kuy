@@ -132,9 +132,9 @@ const MapComponent = ({ navigation }) => {
         }
       }
 
-    //   useEffect(() =>{
-    //     toFirestore();
-    //   },[location])
+      useEffect(() =>{
+        toFirestore();
+      },[location])
 
 
     return (

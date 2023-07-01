@@ -1,4 +1,4 @@
-package com.bimaandika.clientuser;
+package com.tama13.clientuser;
 
 import android.app.Application;
 import android.content.res.Configuration;
