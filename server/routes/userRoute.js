@@ -7,6 +7,8 @@ const router = express.Router()
 router.post('/register', userController.register)
 router.post('/login', userController.login)
 // router.post('/google-signin', userController.loginGoogle)
+router.post("/order", userController.createOrder)
+router.get("/detail/:id", userController.getOrderDetail)
 
 
 
