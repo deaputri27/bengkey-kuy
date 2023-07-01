@@ -16,6 +16,7 @@ router.post('/google-signin', userController.loginGoogle)
 
 router.use(authentication)
 router.post('/review/:id', userController.review)
+router.get('/review/:id', userController.getReview)
 
 
 

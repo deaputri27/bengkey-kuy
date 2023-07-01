@@ -109,6 +109,19 @@ class UserController {
         }
     }
 
+    static async getReview(req, res, next) {
+        try {
+            const {id} = req.params
+            const review = await Review.findAll({
+                where: { partnerId: id }
+            })
+
+            res.status(200).json(review)
+        } catch (err) {
+            next(err)
+        }
+    }
+
     static async createOrder(req, res, next){
         try {
             const {problem, lat, lng, car, carType, license} = req.body
@@ -131,6 +144,14 @@ class UserController {
             res.status(200).json(response)
         } catch (err) {
             console.log(err);
+            next(err)
+        }
+    }
+
+    static async updateStatus(req, res, next){
+        try {
+            
+        } catch (err) {
             next(err)
         }
     }
