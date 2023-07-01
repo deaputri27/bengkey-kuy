@@ -1,6 +1,7 @@
 const { comparePassword } = require('../helper/bcrypt')
 const { signToken } = require('../helper/jwt')
-const { User, Review } = require('../models')
+
+const {User, Order, OrderDetail, Review} = require('../models')
 
 const { OAuth2Client } = require('google-auth-library');
 
@@ -105,6 +106,32 @@ class UserController {
         } catch (err) {
             // next(err)
             console.log(err);
+        }
+    }
+
+    static async createOrder(req, res, next){
+        try {
+            const {problem, lat, lng, car, carType, license} = req.body
+            const location = `POINT(${lat} ${lng})`
+            console.log(req.body);
+            const response = Order.create({problem, location, car, carType, license})
+            res.status(201).json(response)
+        } catch (err) {
+            console.log(err);
+            next(err)
+        }
+    }
+
+
+    static async getOrderDetail(req, res, next){
+        try {
+            const{id} = req.params
+            const response = await OrderDetail.findByPk(id)
+            console.log(response);
+            res.status(200).json(response)
+        } catch (err) {
+            console.log(err);
+            next(err)
         }
     }
 
