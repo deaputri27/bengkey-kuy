@@ -1,0 +1,22 @@
+const { User, Partner } = require('../models')
+const { hashPassword } = require('./bcrypt')
+
+async function bulkInsertPartner() {
+
+    await Partner.destroy({
+        truncate: true,
+        restartIdentity: true,
+        cascade: true
+    })
+    await Partner.bulkCreate([
+        {
+            partnerName: "Bengkel gaya",
+            email: "bengkel@pro.com",
+            password: hashPassword("rahasia"),
+            phoneNumber: "0808080808",
+            address: "Jl. Tamani"
+        }
+    ])
+}
+
+module.exports = bulkInsertPartner
