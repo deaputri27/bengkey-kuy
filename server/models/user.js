@@ -3,6 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
+  const { hashPassword, comparePassword } = require('../helper/bcrypt')
   class User extends Model {
     /**
      * Helper method for defining associations.
@@ -52,6 +53,10 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'User',
+  });
+  User.beforeCreate(async (user, options) => {
+    const hashedPassword = await hashPassword(user.password);
+    user.password = hashedPassword;
   });
   return User;
 };
