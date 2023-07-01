@@ -8,9 +8,10 @@ const userRoute = require('./routes/userRoute');
 const errorHandle = require('./middleware/errorHandler');
 /*  */
 
-app.use(cors())
-app.use(express.urlencoded({ extended: false }))
-app.use(express.json())
+app.use(cors());
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
 
 app.use(router)
 router.use(errorHandle)
@@ -19,5 +20,4 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-module.exports = app
-
+module.exports = app;
