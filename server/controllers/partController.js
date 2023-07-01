@@ -1,25 +1,85 @@
+const { comparePassword } = require('../helper/bcrypt')
+const { signToken } = require('../helper/jwt')
+const { Partner } = require('../models')
 class PartControllers {
-    static register(req, res, next) {
+    static async register(req, res, next) {
         try {
-            
+            const { partnerName, email, password, phoneNumber, address } = req.body
+            const createPartner = await Partner.create({
+                partnerName,
+                email,
+                password,
+                phoneNumber,
+                address
+            })
+            res.status(201).json({ message: `user with id ${createPartner.id} and email ${createPartner.partnerName} has been created` })
+            // console.log(createUser, "<<<")
         } catch (error) {
             next(error);
             console.log(error);
         }
     }
 
-    static login(req, res, next) {
+    static async login(req, res, next) {
         try {
-            
+            const { email, password } = req.body
+            if (!email || !password) {
+                throw { name: "Invalid email/password" }
+            }
+            const user = await Partner.findOne({ where: { email } })
+
+            if (!user) {
+                res.status(401).json({ message: "InvalidToken" })
+                return
+            }
+            const isValidPassword = comparePassword(password, user.password)
+            if (!isValidPassword) {
+                res.status(401).json({
+                    message: "InvalidToken"
+                }) // ini juga
+                return
+            }
+            const access_token = signToken({
+                id: user.id,
+                email: user.email
+            })
+            // console.log(access_token, "<<<<fyfy");
+            res.json({
+                access_token,
+                email,
+            })
         } catch (error) {
             next(error);
-            console.log(error);
+            console.log(error, "<<err");
         }
     }
 
-    static loginGoogle(req, res, next) {
+    static async loginGoogle(req, res, next) {
         try {
-            
+            const googleToken = req.headers.google_token
+            console.log(req.headers, "<<<<<");
+            const client = new OAuth2Client(process.env.CLIENTID);
+            const ticket = await client.verifyIdToken({
+              idToken: googleToken,
+              audience: process.env.CLIENTID
+            });
+            const payload = ticket.getPayload();
+            const userid = payload['sub'];
+            const [user, created] = await User.findOrCreate({
+              where: { email: payload.email },
+              defaults: {
+                username: payload.name,
+                password: "deacantik",
+                phoneNumber: "12345",
+                address: "jl.dea",
+              },
+              hooks: false
+            })
+            const access_token = signToken({
+              id: user.id,
+              email: user.email
+            })
+            res.json({ access_token })
         } catch (error) {
             next(error);
             console.log(error);
