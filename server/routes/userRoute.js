@@ -6,7 +6,12 @@ const router = express.Router()
 // router.use(authentication)
 router.post('/register', userController.register)
 router.post('/login', userController.login)
-// router.post('/google-signin', userController.loginGoogle)
+router.post('/google-signin', userController.loginGoogle)
+
+
+router.use(authentication)
+router.post('/review/:id', userController.review)
+
 
 
 
