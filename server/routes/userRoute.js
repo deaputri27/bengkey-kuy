@@ -8,6 +8,7 @@ router.post('/register', userController.register)
 router.post('/login', userController.login)
 // router.post('/google-signin', userController.loginGoogle)
 router.post("/order", userController.createOrder)
+router.get("/order", userController.getOrderAll)
 router.get("/detail/:id", userController.getOrderDetail)
 
 

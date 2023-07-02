@@ -90,13 +90,26 @@ class UserController {
     static async createOrder(req, res, next){
         try {
             const {problem, lat, lng, car, carType, license} = req.body
-            const location = `POINT(${lat} ${lng})`
-            console.log(req.body);
-            const response = Order.create({problem, location, car, carType, license})
+            const geojson = {
+                type: 'Point',
+                coordinates: [lng, lat]
+              };
+            const toString = JSON.stringify(geojson)
+            const response = Order.create({problem, location: toString, car, carType, userId:2,license})
             res.status(201).json(response)
         } catch (err) {
             console.log(err);
             next(err)
+        }
+    }
+
+    static async getOrderAll(req, res, next){
+        try {
+            const response = await Order.findAll()
+            console.log(response);
+            res.status(200).json(response)
+        } catch (err) {
+            console.log(err);
         }
     }
 
