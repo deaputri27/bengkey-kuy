@@ -163,9 +163,9 @@ class UserController {
   static async findStoresByRadius(req, res, next) {
     try {
       // distance on meter unit
-      const distance = req.query.distance || 10000000;
-      const long = req.query.long || "-6.9439994342171225";
-      const lat = req.query.lat || "107.5904275402039";
+      const distance = req.query.distance || 10000;
+      const long = req.query.long || "-6.260576726969987";
+      const lat = req.query.lat || "106.78171420171469";
 
       let result = await sequelize.query(
         `select
@@ -191,7 +191,7 @@ class UserController {
           type: sequelize.QueryTypes.SELECT,
         }
       );
-      console.log(result);
+      // console.log(result);
 
       const newResult = result.map((el) => {
         return {
@@ -206,8 +206,8 @@ class UserController {
         };
       });
 
-      
-      res.status(200).json(newResult);
+      console.log(newResult[0].distance/1000 + "km");
+      res.status(200).json(newResult.sort((a, b) => a.distance - b.distance));
     } catch (error) {
       console.log(error);
       res.status(500).json(error);
