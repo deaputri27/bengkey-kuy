@@ -187,7 +187,7 @@ describe('Partner testing', function () {
             })
             expect(response.status).toEqual(401)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('message', "InvalidToken")
+            expect(response.body).toHaveProperty('message', "Invalid email/password")
             expect(typeof response.body.message).toEqual('string')
         })
         test('POST /partners/login failed because wrong email input', async function(){
@@ -199,7 +199,7 @@ describe('Partner testing', function () {
             })
             expect(response.status).toEqual(401)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('message', "InvalidToken")
+            expect(response.body).toHaveProperty('message', "User not found")
             expect(typeof response.body.message).toEqual('string')
         })
     })

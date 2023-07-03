@@ -17,7 +17,14 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Order.init({
-    problem: DataTypes.STRING,
+    problem: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate:{
+        notEmpty: { msg: `Problem is require` },
+        notNull: { msg: `Problem is invalid` },
+      }
+    },
     location: {
       type: DataTypes.GEOMETRY('POINT'),
       allowNull: false,
@@ -29,9 +36,30 @@ module.exports = (sequelize, DataTypes) => {
     totalPrice: DataTypes.INTEGER,
     status: DataTypes.STRING,
     paymentStatus: DataTypes.STRING,
-    car: DataTypes.STRING,
-    carType: DataTypes.STRING,
-    license: DataTypes.STRING,
+    car:  {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate:{
+        notEmpty: { msg: `Car is require` },
+        notNull: { msg: `Car is invalid` },
+      }
+    },
+    carType:  {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate:{
+        notEmpty: { msg: `car Type is require` },
+        notNull: { msg: `car Type is invalid` },
+      }
+    },
+    license:  {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate:{
+        notEmpty: { msg: `license is require` },
+        notNull: { msg: `license is invalid` },
+      }
+    },
     userId: {
       type: DataTypes.STRING,
       allowNull: false,

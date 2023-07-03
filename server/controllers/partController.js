@@ -29,13 +29,13 @@ class PartControllers {
             const user = await Partner.findOne({ where: { email } })
 
             if (!user) {
-                res.status(401).json({ message: "InvalidToken" })
+                res.status(401).json({ message: "User not found" })
                 return
             }
             const isValidPassword = comparePassword(password, user.password)
             if (!isValidPassword) {
                 res.status(401).json({
-                    message: "InvalidToken"
+                    message: "Invalid email/password"
                 }) // ini juga
                 return
             }

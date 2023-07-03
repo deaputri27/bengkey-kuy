@@ -10,7 +10,12 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       problem: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: { msg: `problem is require` },
+          notNull: { msg: `problem is invalid` },
+        }
       },
       location: {
         type: Sequelize.GEOMETRY('POINT'),
@@ -30,13 +35,28 @@ module.exports = {
         type: Sequelize.STRING
       },
       car: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
+      validate: {
+        notEmpty: { msg: `Car is require` },
+        notNull: { msg: `Car is invalid` },
+      }
       },
       carType: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
+      validate: {
+        notEmpty: { msg: `carType is require` },
+        notNull: { msg: `carType is invalid` },
+      }
       },
       license: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
+      validate: {
+        notEmpty: { msg: `license is require` },
+        notNull: { msg: `license is invalid` },
+      }
       },
       userId: {
         type: Sequelize.INTEGER,
