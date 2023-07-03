@@ -8,8 +8,10 @@ router.post('/register', partControllers.register)
 // router.post('/google-signin', partControllers.loginGoogle)
 
 router.use(authentication)
-router.post('/products/:productId', partControllers.createOrderDetail)
-router.get('/products', partControllers.readOrderDetail)
+router.post('/products', partControllers.createOrderDetail)
+router.get('/products/:orderId', partControllers.readOrderDetail)
+router.post('/send-email', partControllers.sendEmail)
+
 
 
 

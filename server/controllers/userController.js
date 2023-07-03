@@ -1,10 +1,12 @@
 const { comparePassword } = require('../helper/bcrypt')
 const { signToken } = require('../helper/jwt')
-const { User, OrderDetail, Product } = require("../models")
+const { User, OrderDetail, Product, Order } = require("../models")
 
 // const { OAuth2Client } = require('google-auth-library');
 const midtransClient = require('midtrans-client');
-
+const { CoreApi } = require('midtrans-client');
+const { createTransaction } = require('midtrans-client');
+const { sequelize } = require('../models'); 
 
 class UserController {
     static async register(req, res, next) {
@@ -89,13 +91,45 @@ class UserController {
     //     }
     // }
 
+    static async createOrder(req, res, next) {
+        try {
+            const { problem, lat, lng, car, carType, license } = req.body
+            // console.log(req.body, ">>>>>>>>>>>");
+            const geojson = {
+                type: 'Point',
+                coordinates: [lng, lat]
+            };
+            const toString = JSON.stringify(geojson)
+            const response = await Order.create({ problem, location: toString, car, carType, userId: req.user.id, license })
+            // console.log(response, ">>>>>>>>>>>>");
+            res.status(201).json(response)
+        } catch (err) {
+            console.log(err);
+            // next(err)
+        }
+    }
+
+
+    static async getOrderAll(req, res, next) {
+        try {
+            const response = await Order.findAll()
+            console.log(response);
+            res.status(200).json(response)
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+
     static async generateMidtransToken(req, res, next) {
         try {
+            const { orderId } = req.params
+
             const findUser = await User.findByPk(req.user.id)
             // if (findUser.isSubscribed) {
             //     throw { name: "already_subscribed" }
             // }
-            
+
             let snap = new midtransClient.Snap({
                 isProduction: false,
                 serverKey: process.env.MIDTRANS_SERVER_KEY,
@@ -107,7 +141,7 @@ class UserController {
                 }, include: {
                     model: Product,
                 },
-                where: { orderId: 1 }
+                where: { orderId: orderId }
             })
             // res.status(201).json(myProducts[0])
             // console.log(myProducts[0], ">>>>>>>>>>>>>>>>");
@@ -116,7 +150,6 @@ class UserController {
             for (let i = 0; i < myProducts.length; i++) {
                 let price = myProducts[i].Product.price * myProducts[i].quantity
                 totalPrice += price
-
             }
             // console.log(total);
 
@@ -129,10 +162,11 @@ class UserController {
                 obj.name = el.Product.productName
                 items.push(obj)
             });
-        
+
             let parameter = {
+                "payment_type": "bank_transfer",
                 "transaction_details": {
-                    "order_id": "TRANSACTION_" + Math.floor(1000000 + Math.random() * 9000000),
+                    "order_id": orderId,
                     "gross_amount": totalPrice
                 },
                 "credit_card": {
@@ -148,8 +182,29 @@ class UserController {
             };
 
             const midtransToken = await snap.createTransaction(parameter)
-            // console.log(midtransToken, ">>>>>>>>>>");
+            // console.log(midtransToken, ">>>>>>>>>>")
+
+
             res.status(201).json(midtransToken)
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    static async paymentStatus(req, res, next) {
+        try {
+
+            // console.log(req.body.transaction_status);
+            const midtransRespond = req.body.transaction_status
+            const id = req.body.order_id
+            // console.log(orderId);
+
+            if (midtransRespond === "settlement" || midtransRespond === "capture") {
+                await Order.update({ paymentStatus: "isPaid" }, { where: { id } })
+                
+                res.status(200).json("pembayaran berhasil")
+            }
 
         } catch (error) {
             console.log(error);
