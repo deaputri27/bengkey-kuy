@@ -101,7 +101,7 @@ class UserController {
 
             // console.log(user, id, review, rating, `<<<<<<`);
 
-            const  postReview  = await Review.create({
+            const postReview = await Review.create({
                 userId: user, partnerId: id, review, rating
             })
             res.status(200).json({ postReview })
@@ -127,34 +127,69 @@ class UserController {
     static async createOrder(req, res, next) {
         try {
             const { problem, lat, lng, car, carType, license } = req.body;
-            console.log(req.body, "req body orderrr<<");
+            const userId = req.user.id
             const geojson = {
                 type: "Point",
                 coordinates: [lng, lat],
             };
             const toString = JSON.stringify(geojson);
-            console.log({
-                problem,
+            const response = await Order.create({
+                problem: 'problem',
                 location: toString,
-                car,
-                carType,
-                userId: 2,
-                license,
+                car: 'car',
+                carType: 'carType',
+                userId: userId,
+                license: 'license',
+                status: 'inactive',
+                paymentStatus: 'unpaid'
             });
-            const response = await  Order.create({
-                problem,
-                location: toString,
-                car,
-                carType,
-                userId: 2,
-                license,
-            });
-            res.status(201).json({message: "Order been success to create"});
+            res.status(201).json({ message: "Order been success to create" });
         } catch (err) {
             console.log(err, "<<<<< error");
             next(err)
         }
     }
+
+    static async updateProblem(req, res, next) {
+        try {
+            const id = req.params.orderId;
+            const { problem, car, carType, license, lat, lng, status, statusPayment } = req.body
+            const order = await Order.update({ problem, car, carType, license, lat, lng, status, statusPayment },
+                { where: { id } }
+            )
+            res.status(201).json({ message: `entity with id ${id} updated `})
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    static async updateStatus(req, res, next) {
+        try {
+            const id = req.params.orderId;
+            const { partnerId } = req.body
+            const order = await Order.update({ partnerId: partnerId, status: 'active' },
+                { where: { id } }
+            )
+            console.log(order);
+            res.status(201).json({ message: `entity with id ${id} updated `})
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    static async addOrderDetail(req, res, next){
+        try {
+            const orderId = req.params.orderId
+            const { productId, quantity } = req.body
+
+            const listOrder = await OrderDetail.create({ orderId: orderId, productId, quantity })
+
+            res.status(201).json(listOrder)
+        } catch (error) {
+            next(error)
+        }
+    }
+
     static async getOrderDetail(req, res, next) {
         try {
             const { id } = req.params
@@ -163,14 +198,6 @@ class UserController {
             res.status(200).json(response)
         } catch (err) {
             console.log(err);
-            next(err)
-        }
-    }
-
-    static async updateStatus(req, res, next) {
-        try {
-
-        } catch (err) {
             next(err)
         }
     }

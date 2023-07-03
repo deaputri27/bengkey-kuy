@@ -203,4 +203,13 @@ describe('Partner testing', function () {
             expect(typeof response.body.message).toEqual('string')
         })
     })
+    describe('Create Order Detail', function(){
+        test('POST /partners/products/:productId success', async function(){
+            const response = await request(app)
+            .post('/partners/products/:productId')
+            .set({
+                access_token
+            })
+        })
+    })
 })

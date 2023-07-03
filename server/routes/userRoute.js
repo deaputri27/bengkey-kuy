@@ -10,12 +10,22 @@ router.post('/google-signin', userController.loginGoogle)
 
 router.use(authentication)
 router.post("/order", userController.createOrder)
+router.put("/order/:orderId", userController.updateProblem)
+router.put("/order/status/:orderId", userController.updateStatus)
+
+router.post("/order/detail/:orderId", userController.addOrderDetail)
+
+
 router.get("/detail/:id", userController.getOrderDetail)
 
 
 
 router.post('/review/:id', userController.review)
 router.get('/review/:id', userController.getReview)
+
+router.get('/review/:id', userController.getReview)
+
+
 
 
 
