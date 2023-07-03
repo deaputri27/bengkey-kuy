@@ -210,6 +210,7 @@ describe('Partner testing', function () {
             .set({
                 access_token
             })
+            
         })
     })
 })

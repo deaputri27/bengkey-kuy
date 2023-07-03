@@ -9,6 +9,8 @@ router.post('/google-signin', userController.loginGoogle)
 
 
 router.use(authentication)
+router.get("/order/detail/:orderId", userController.getOrder)
+router.get("/distance", userController.findStoresByRadius)
 router.post("/order", userController.createOrder)
 router.put("/order/:orderId", userController.updateProblem)
 router.put("/order/status/:orderId", userController.updateStatus)

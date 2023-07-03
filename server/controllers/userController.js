@@ -3,6 +3,8 @@ const { signToken } = require('../helper/jwt')
 const midtransClient = require('midtrans-client');
 const { User, Order, OrderDetail, Review, Product } = require('../models')
 
+const { sequelize } = require("../models");
+const geolib = require("geolib");
 const { OAuth2Client } = require('google-auth-library');
 
 class UserController {
@@ -157,7 +159,7 @@ class UserController {
             const order = await Order.update({ problem, car, carType, license, lat, lng, status, statusPayment },
                 { where: { id } }
             )
-            res.status(201).json({ message: `entity with id ${id} updated `})
+            res.status(201).json({ message: `entity with id ${id} updated ` })
         } catch (error) {
             next(error)
         }
@@ -171,13 +173,13 @@ class UserController {
                 { where: { id } }
             )
             console.log(order);
-            res.status(201).json({ message: `entity with id ${id} updated `})
+            res.status(201).json({ message: `entity with id ${id} updated ` })
         } catch (error) {
             next(error)
         }
     }
 
-    static async addOrderDetail(req, res, next){
+    static async addOrderDetail(req, res, next) {
         try {
             const orderId = req.params.orderId
             const { productId, quantity } = req.body
@@ -263,6 +265,95 @@ class UserController {
 
         } catch (error) {
             console.log(error);
+        }
+    }
+
+    static async paymentStatus(req, res, next) {
+        try {
+
+            // console.log(req.body.transaction_status);
+            const midtransRespond = req.body.transaction_status
+            const id = req.body.order_id
+            // console.log(orderId);
+
+            if (midtransRespond === "settlement" || midtransRespond === "capture") {
+                await Order.update({ paymentStatus: "isPaid" }, { where: { id } })
+                
+                res.status(200).json("pembayaran berhasil")
+            }
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    static async findStoresByRadius(req, res, next) {
+        try {
+            // distance on meter unit
+            const distance = req.query.distance || 10000;
+            const long = req.query.long || "-6.260576726969987";
+            const lat = req.query.lat || "106.78171420171469";
+
+            let result = await sequelize.query(
+                `select
+            id,
+            location
+          from
+            "Partners"
+          where
+            ST_DWithin(location,
+            ST_MakePoint(:lat,
+            :long),
+            :distance,
+          true) = true;`,
+                {
+                    replacements: {
+                        distance: +distance,
+                        long: parseFloat(long),
+                        lat: parseFloat(lat),
+                    },
+                    logging: console.log,
+                    plain: false,
+                    raw: false,
+                    type: sequelize.QueryTypes.SELECT,
+                }
+            );
+            // console.log(result);
+
+            const newResult = result.map((el) => {
+                return {
+                    ...el,
+                    distance: geolib.getDistance(
+                        { latitude: lat, longitude: long },
+                        {
+                            latitude: el.location.coordinates[0],
+                            longitude: el.location.coordinates[1],
+                        }
+                    ),
+                };
+            });
+
+            console.log(newResult[0].distance / 1000 + "km");
+            res.status(200).json(newResult.sort((a, b) => a.distance - b.distance));
+        } catch (error) {
+            console.log(error);
+            res.status(500).json(error);
+        }
+    }
+
+    static async getOrder(req, res, next) {
+        try {
+            const { orderId } = req.params
+
+            const order = await Order.findByPk( orderId, {
+                include: {
+                    model: Product
+                }
+            })
+
+            res.status(200).json(order)
+        } catch (error) {
+            next(error)
         }
     }
 
