@@ -1,8 +1,10 @@
 const { comparePassword } = require('../helper/bcrypt')
 const { signToken } = require('../helper/jwt')
 const midtransClient = require('midtrans-client');
-const {User, Order, OrderDetail, Review, Product} = require('../models')
+const { User, Order, OrderDetail, Review, Product } = require('../models')
 
+const { sequelize } = require("../models");
+const geolib = require("geolib");
 const { OAuth2Client } = require('google-auth-library');
 
 class UserController {
@@ -18,7 +20,7 @@ class UserController {
             res.status(201).json({ message: `user with id ${createUser.id} and email ${createUser.email} has been created` })
             // console.log(createUser, "<<<")
         } catch (error) {
-            // next(error);
+            next(error);
             console.log(error);
         }
     }
@@ -26,15 +28,18 @@ class UserController {
     static async login(req, res, next) {
         try {
             const { email, password } = req.body
+            console.log(req.body, 'req body login userr<<');
             if (!email || !password) {
                 throw { name: "Invalid email/password" }
             }
             const user = await User.findOne({ where: { email } })
+            console.log(user, "userr<<");
             if (!user) {
                 res.status(401).json({ message: "InvalidToken" })
                 return
             }
             const isValidPassword = comparePassword(password, user.password)
+            console.log(isValidPassword, "valid pass<<");
             if (!isValidPassword) {
                 res.status(401).json({
                     message: "InvalidToken"
@@ -56,45 +61,45 @@ class UserController {
         }
     }
 
-    static async loginGoogle(req,res,next){
+    static async loginGoogle(req, res, next) {
         try {
             const googleToken = req.headers.google_token
             console.log(req.headers, "<<<<<");
             const client = new OAuth2Client(process.env.CLIENTID);
             const ticket = await client.verifyIdToken({
-              idToken: googleToken,
-              audience: process.env.CLIENTID
+                idToken: googleToken,
+                audience: process.env.CLIENTID
             });
             const payload = ticket.getPayload();
             const userid = payload['sub'];
             const [user, created] = await User.findOrCreate({
-              where: { email: payload.email },
-              defaults: {
-                username: payload.name,
-                password: "deacantik",
-                phoneNumber: "12345",
-                address: "jl.dea",
-              },
-              hooks: false
+                where: { email: payload.email },
+                defaults: {
+                    username: payload.name,
+                    password: "deacantik",
+                    phoneNumber: "12345",
+                    address: "jl.dea",
+                },
+                hooks: false
             })
             const access_token = signToken({
-              id: user.id,
-              email: user.email
+                id: user.id,
+                email: user.email
             })
             res.json({ access_token })
-      
-          } catch (error) {
+
+        } catch (error) {
             next(error)
             console.log(error);
         }
     }
 
-    static async review(req, res, next){
+    static async review(req, res, next) {
         try {
             // console.log(req.user.dataValues.id);
             const user = req.user.dataValues.id
-            const {id} = req.params
-            const { review, rating,  } = req.body
+            const { id } = req.params
+            const { review, rating, } = req.body
 
             // console.log(user, id, review, rating, `<<<<<<`);
 
@@ -110,7 +115,7 @@ class UserController {
 
     static async getReview(req, res, next) {
         try {
-            const {id} = req.params
+            const { id } = req.params
             const review = await Review.findAll({
                 where: { partnerId: id }
             })
@@ -121,25 +126,77 @@ class UserController {
         }
     }
 
-    static async createOrder(req, res, next){
+    static async createOrder(req, res, next) {
         try {
-            const {problem, lat, lng, car, carType, license} = req.body
-            const location = `POINT(${lat} ${lng})`
-            console.log(req.body);
-            const response = Order.create({problem, location, car, carType, license})
-            res.status(201).json(response)
+            const { problem, lat, lng, car, carType, license } = req.body;
+            const userId = req.user.id
+            const geojson = {
+                type: "Point",
+                coordinates: [lng, lat],
+            };
+            const toString = JSON.stringify(geojson);
+            const response = await Order.create({
+                problem: 'problem',
+                location: toString,
+                car: 'car',
+                carType: 'carType',
+                userId: userId,
+                license: 'license',
+                status: 'inactive',
+                paymentStatus: 'unpaid'
+            });
+            res.status(201).json({ message: "Order been success to create" });
         } catch (err) {
-            console.log(err);
+            console.log(err, "<<<<< error");
             next(err)
         }
     }
 
-
-    static async getOrderDetail(req, res, next){
+    static async updateProblem(req, res, next) {
         try {
-            const{id} = req.params
+            const id = req.params.orderId;
+            const { problem, car, carType, license, lat, lng, status, statusPayment } = req.body
+            const order = await Order.update({ problem, car, carType, license, lat, lng, status, statusPayment },
+                { where: { id } }
+            )
+            res.status(201).json({ message: `entity with id ${id} updated ` })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    static async updateStatus(req, res, next) {
+        try {
+            const id = req.params.orderId;
+            const { partnerId } = req.body
+            const order = await Order.update({ partnerId: partnerId, status: 'active' },
+                { where: { id } }
+            )
+            console.log(order);
+            res.status(201).json({ message: `entity with id ${id} updated ` })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    static async addOrderDetail(req, res, next) {
+        try {
+            const orderId = req.params.orderId
+            const { productId, quantity } = req.body
+
+            const listOrder = await OrderDetail.create({ orderId: orderId, productId, quantity })
+
+            res.status(201).json(listOrder)
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    static async getOrderDetail(req, res, next) {
+        try {
+            const { id } = req.params
             const response = await OrderDetail.findByPk(id)
-            console.log(response);
+            console.log(response, "<<< response");
             res.status(200).json(response)
         } catch (err) {
             console.log(err);
@@ -147,21 +204,10 @@ class UserController {
         }
     }
 
-    static async updateStatus(req, res, next){
-        try {
-            
-        } catch (err) {
-            next(err)
-        }
-    }
-
     static async generateMidtransToken(req, res, next) {
         try {
             const findUser = await User.findByPk(req.user.id)
-            // if (findUser.isSubscribed) {
-            //     throw { name: "already_subscribed" }
-            // }
-            
+
             let snap = new midtransClient.Snap({
                 isProduction: false,
                 serverKey: process.env.MIDTRANS_SERVER_KEY,
@@ -195,7 +241,7 @@ class UserController {
                 obj.name = el.Product.productName
                 items.push(obj)
             });
-        
+
             let parameter = {
                 "transaction_details": {
                     "order_id": "TRANSACTION_" + Math.floor(1000000 + Math.random() * 9000000),
@@ -219,6 +265,95 @@ class UserController {
 
         } catch (error) {
             console.log(error);
+        }
+    }
+
+    static async paymentStatus(req, res, next) {
+        try {
+
+            // console.log(req.body.transaction_status);
+            const midtransRespond = req.body.transaction_status
+            const id = req.body.order_id
+            // console.log(orderId);
+
+            if (midtransRespond === "settlement" || midtransRespond === "capture") {
+                await Order.update({ paymentStatus: "isPaid" }, { where: { id } })
+                
+                res.status(200).json("pembayaran berhasil")
+            }
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    static async findStoresByRadius(req, res, next) {
+        try {
+            // distance on meter unit
+            const distance = req.query.distance || 10000;
+            const long = req.query.long || "-6.260576726969987";
+            const lat = req.query.lat || "106.78171420171469";
+
+            let result = await sequelize.query(
+                `select
+            id,
+            location
+          from
+            "Partners"
+          where
+            ST_DWithin(location,
+            ST_MakePoint(:lat,
+            :long),
+            :distance,
+          true) = true;`,
+                {
+                    replacements: {
+                        distance: +distance,
+                        long: parseFloat(long),
+                        lat: parseFloat(lat),
+                    },
+                    logging: console.log,
+                    plain: false,
+                    raw: false,
+                    type: sequelize.QueryTypes.SELECT,
+                }
+            );
+            // console.log(result);
+
+            const newResult = result.map((el) => {
+                return {
+                    ...el,
+                    distance: geolib.getDistance(
+                        { latitude: lat, longitude: long },
+                        {
+                            latitude: el.location.coordinates[0],
+                            longitude: el.location.coordinates[1],
+                        }
+                    ),
+                };
+            });
+
+            console.log(newResult[0].distance / 1000 + "km");
+            res.status(200).json(newResult.sort((a, b) => a.distance - b.distance));
+        } catch (error) {
+            console.log(error);
+            res.status(500).json(error);
+        }
+    }
+
+    static async getOrder(req, res, next) {
+        try {
+            const { orderId } = req.params
+
+            const order = await Order.findByPk( orderId, {
+                include: {
+                    model: Product
+                }
+            })
+
+            res.status(200).json(order)
+        } catch (error) {
+            next(error)
         }
     }
 

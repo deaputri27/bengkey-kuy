@@ -5,21 +5,33 @@ const router = express.Router()
 
 router.post('/register', userController.register)
 router.post('/login', userController.login)
-
-
-router.post("/order", userController.createOrder)
-router.get("/detail/:id", userController.getOrderDetail)
-
 router.post('/google-signin', userController.loginGoogle)
 
 
 router.use(authentication)
+router.get("/order/detail/:orderId", userController.getOrder)
+router.get("/distance", userController.findStoresByRadius)
+router.post("/order", userController.createOrder)
+router.put("/order/:orderId", userController.updateProblem)
+router.put("/order/status/:orderId", userController.updateStatus)
+
+router.post("/order/detail/:orderId", userController.addOrderDetail)
+
+
+router.get("/detail/:id", userController.getOrderDetail)
+
+
+
 router.post('/review/:id', userController.review)
+router.get('/review/:id', userController.getReview)
+
 router.get('/review/:id', userController.getReview)
 
 
 
-router.use(authentication)
+
+
+// router.use(authentication)
 router.post("/process-transaction", userController.generateMidtransToken)
 
 

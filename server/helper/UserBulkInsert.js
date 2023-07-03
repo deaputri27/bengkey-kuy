@@ -9,14 +9,14 @@ async function bulkInsertCust() {
         cascade: true
     })
 
-    await User.bulkCreate([
+    return await User.create(
         {
             username: "deaimut",
             email: "deacantik@gmail.com",
-            password: hashPassword("inidea"),
+            password: "inidea",
             phoneNumber: "081122333"
         }
-    ])
+    )
 }
 
 module.exports = bulkInsertCust

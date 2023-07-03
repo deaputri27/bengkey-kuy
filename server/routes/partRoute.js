@@ -1,15 +1,18 @@
 const express = require('express')
 const partControllers = require('../controllers/partController')
 const router = express.Router()
-const authentication = require('../middleware/authentication')
+const authenticationPartner = require('../middleware/authenticationPartner')
 
 router.post('/register', partControllers.register)
 router.post('/login', partControllers.login)
 // router.post('/google-signin', partControllers.loginGoogle)
 
-router.use(authentication)
+router.use(authenticationPartner)
 router.post('/products/:productId', partControllers.createOrderDetail)
-router.get('/products', partControllers.readOrderDetail)
+router.get('/products/:orderId', partControllers.readOrderDetail)
+
+router.post('/products', partControllers.createOrderDetail)
+router.post('/send-email', partControllers.sendEmail)
 
 
 

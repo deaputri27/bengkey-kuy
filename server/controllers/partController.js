@@ -2,6 +2,7 @@ const { comparePassword } = require('../helper/bcrypt')
 const { signToken } = require('../helper/jwt')
 const { Partner, Product, OrderDetail, User } = require('../models')
 class PartControllers {
+
     static async register(req, res, next) {
         try {
             const { partnerName, email, password, phoneNumber, address } = req.body
@@ -11,6 +12,7 @@ class PartControllers {
                 password,
                 phoneNumber,
                 address
+
             })
             res.status(201).json({ message: `user with id ${createPartner.id} and email ${createPartner.partnerName} has been created` })
             // console.log(createUser, "<<<")
@@ -29,13 +31,13 @@ class PartControllers {
             const user = await Partner.findOne({ where: { email } })
 
             if (!user) {
-                res.status(401).json({ message: "InvalidToken" })
+                res.status(401).json({ message: "User not found" })
                 return
             }
             const isValidPassword = comparePassword(password, user.password)
             if (!isValidPassword) {
                 res.status(401).json({
-                    message: "InvalidToken"
+                    message: "Invalid email/password"
                 }) // ini juga
                 return
             }
@@ -88,27 +90,14 @@ class PartControllers {
 
     static async createOrderDetail(req, res, next) {
         try {
-            const { productId } = req.params
-            const products = await Product.findByPk(productId)
-            if (!products) {
-                throw { name: "NotFound" }
-            }
-
-            const findUser = await User.findByPk(req.user.id)
-            // console.log(findUser, ">>>>>>>>>>>>>>>>");
-
-            const myProduct = await OrderDetail.create({
-                orderId: 1,
-                productId: productId,
-                quantity: req.body.quantity
+            const { orderId, products } = req.body
+            products.map((el) => {
+                el.orderId = orderId
             })
-
-            res.status(201).json({
-                id: myProduct.id,
-                orderId: myProduct.orderId,
-                productId: myProduct.productId,
-                quantity: myProduct.quantity
-            })
+            
+            await OrderDetail.bulkCreate(products)
+        
+            res.json({ message: "order created"})
 
         } catch (error) {
             console.log(error);
@@ -122,6 +111,7 @@ class PartControllers {
 
     static async readOrderDetail(req, res, next) {
         try {
+            const { orderId } = req.params
             const myProducts = await OrderDetail.findAll({
                 attributes: {
                     exclude: ['createdAt', 'updatedAt']
@@ -131,7 +121,7 @@ class PartControllers {
                         exclude: ['id', 'createdAt', 'updatedAt']
                     }
                 },
-                where: { orderId: 1 }
+                where: { orderId: orderId }
             })
             // console.log(myProducts, ".>>>>>>>>>>>>>>>>");
             res.status(200).json(myProducts)
@@ -139,6 +129,107 @@ class PartControllers {
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Internal server error" })
+        }
+    }
+
+    static async sendEmail(req, res, next) {
+        try {
+
+            const htmlContent = fs.readFileSync('invoice.ejs', 'utf-8');
+
+            const myProducts = await OrderDetail.findAll({
+                attributes: {
+                    exclude: ['createdAt', 'updatedAt']
+                }, include: ['Product', 'Order'],
+                where: { orderId: 1 }
+            })
+
+            let totalPrice = 0
+            for (let i = 0; i < myProducts.length; i++) {
+                let price = myProducts[i].Product.price * myProducts[i].quantity
+                totalPrice += price
+            }
+            // res.status(201).json(myProducts)
+
+            const findUser = await User.findByPk(req.user.id)
+            // res.status(201).json(findUser)
+
+            const renderedTemplate = ejs.render(htmlContent, { myProducts, findUser, totalPrice, FormatRupiah });
+
+            const inlineHtml = await inlineCss(renderedTemplate, {
+                url: 'file://path/to/bootstrap.min.css',
+            });
+
+            async function convertHtmlToImage(renderedTemplate) {
+                const browser = await puppeteer.launch({ headless: 'new' });
+                const page = await browser.newPage();
+                await page.setContent(renderedTemplate, { waitUntil: 'networkidle0' });
+                await page.setViewport({ width: 800, height: 600 });
+                const screenshot = await page.screenshot({ type: 'png', fullPage: true });
+                await browser.close();
+                return screenshot;
+            }
+
+            async function convertImageToPdf(imageBuffer) {
+                const browser = await puppeteer.launch({ headless: 'new' });
+                const page = await browser.newPage();
+
+                await page.setContent(`<img src="data:image/png;base64,${imageBuffer.toString('base64')}">`, {
+                    waitUntil: 'networkidle0',
+                });
+
+                const pdfBuffer = await page.pdf({
+                    format: 'A3',
+                    margin: {
+                        top: "30px",
+                        bottom: "20px",
+                        left: "150px",
+
+                    },
+                    printBackground: true,
+                });
+                await browser.close();
+                return pdfBuffer;
+            }
+
+            const imageBuffer = await convertHtmlToImage(renderedTemplate);
+            const pdfBuffer = await convertImageToPdf(imageBuffer);
+
+            async function sendEmailWithAttachment(pdfBuffer) {
+                const transporter = nodemailer.createTransport({
+                    service: 'Gmail',
+                    auth: {
+                        user: 'fastwheel007official@gmail.com',
+                        pass: 'pwxrenejewkscpus',
+                    },
+                })
+
+                const mailOptions = {
+                    from: 'fastwheel007official@gmail.com',
+                    to: 'fauziwahyudi12@gmail.com',
+                    subject: 'Terima kasih atas pembayaran Anda - fastWheel007 - TRANSACTION_4689571',
+                    text: 'This is the plain text body of the email',
+                    html: inlineHtml,
+                    attachments: [
+                        {
+                            filename: 'invoice.pdf',
+                            content: pdfBuffer,
+                            contentType: 'application/pdf',
+                        },
+                    ],
+                };
+
+                await transporter.sendMail(mailOptions);
+            }
+
+            await sendEmailWithAttachment(pdfBuffer);
+
+            res.status(200).json({ message: 'Email sent successfully' });
+
+
+        } catch (error) {
+            console.error(error);
+            res.status(500).send('Failed to generate PDF and send email.');
         }
     }
 
