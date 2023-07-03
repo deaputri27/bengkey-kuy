@@ -10,6 +10,7 @@ router.post('/login', userController.login)
 
 router.post("/order", userController.createOrder)
 router.get("/order", userController.getOrderAll)
+router.get("/distance", userController.findStoresByRadius)
 router.get("/detail/:id", userController.getOrderDetail)
 
 router.post('/google-signin', userController.loginGoogle)
