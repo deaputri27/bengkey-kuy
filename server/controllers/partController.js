@@ -11,13 +11,14 @@ const ejs = require('ejs');
 class PartControllers {
     static async register(req, res, next) {
         try {
-            const { partnerName, email, password, phoneNumber, address } = req.body
+            const { partnerName, email, password, phoneNumber, address, imageUrl } = req.body
             const createPartner = await Partner.create({
                 partnerName,
                 email,
                 password,
                 phoneNumber,
-                address
+                address,
+                imageUrl
             })
             res.status(201).json({ message: `user with id ${createPartner.id} and email ${createPartner.partnerName} has been created` })
             // console.log(createUser, "<<<")

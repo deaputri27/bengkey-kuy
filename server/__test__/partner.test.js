@@ -37,10 +37,10 @@ describe('Partner testing', function () {
                     email: "juju@pro.com",
                     password: hashPassword("rahasia"),
                     phoneNumber: "0808080808",
-                    address: "Jl. Tamani"
+                    address: "Jl. Tamani",
+                    imageUrl: "https://teknisimobil.com/wp-content/uploads/2018/01/Kunci-yang-Diperlukan-di-Bengkel-Mobil-3.jpg"
                 })
 
-            console.log(response.body, "<<<<<<");
             expect(response.status).toEqual(201)
             expect(typeof response.body).toEqual('object')
             expect(response.body).toHaveProperty('message')
@@ -53,7 +53,8 @@ describe('Partner testing', function () {
                     partnerName: "bengkel jaya",
                     password: hashPassword("rahasia"),
                     phoneNumber: "0808080808",
-                    address: "Jl. Tamani"
+                    address: "Jl. Tamani",
+                    imageUrl: "https://teknisimobil.com/wp-content/uploads/2018/01/Kunci-yang-Diperlukan-di-Bengkel-Mobil-3.jpg"
                 })
 
             expect(response.status).toEqual(400)
@@ -68,7 +69,8 @@ describe('Partner testing', function () {
                     partnerName: "bengkel jaya",
                     email: "juju@pro.com",
                     phoneNumber: "0808080808",
-                    address: "Jl. Tamani"
+                    address: "Jl. Tamani",
+                    imageUrl: "https://teknisimobil.com/wp-content/uploads/2018/01/Kunci-yang-Diperlukan-di-Bengkel-Mobil-3.jpg"
                 })
 
             expect(response.status).toEqual(400)
@@ -84,7 +86,8 @@ describe('Partner testing', function () {
                     email: "",
                     password: hashPassword("rahasia"),
                     phoneNumber: "0808080808",
-                    address: "Jl. Tamani"
+                    address: "Jl. Tamani",
+                    imageUrl: "https://teknisimobil.com/wp-content/uploads/2018/01/Kunci-yang-Diperlukan-di-Bengkel-Mobil-3.jpg"
                 })
 
             expect(response.status).toEqual(400)
@@ -100,7 +103,8 @@ describe('Partner testing', function () {
                     email: "juju@pro.com",
                     password: hashPassword("rahasia"),
                     phoneNumber: "0808080808",
-                    address: "Jl. Tamani"
+                    address: "Jl. Tamani",
+                    imageUrl: "https://teknisimobil.com/wp-content/uploads/2018/01/Kunci-yang-Diperlukan-di-Bengkel-Mobil-3.jpg"
                 })
 
             expect(response.status).toEqual(400)
@@ -116,7 +120,8 @@ describe('Partner testing', function () {
                     email: "juju@pro.com",
                     password: hashPassword(""),
                     phoneNumber: "0808080808",
-                    address: "Jl. Tamani"
+                    address: "Jl. Tamani",
+                    imageUrl: "https://teknisimobil.com/wp-content/uploads/2018/01/Kunci-yang-Diperlukan-di-Bengkel-Mobil-3.jpg"
                 })
 
             expect(response.status).toEqual(400)
@@ -132,7 +137,8 @@ describe('Partner testing', function () {
                     email: "juju@pro.com",
                     password: hashPassword("rahasia"),
                     phoneNumber: "",
-                    address: "Jl. Tamani"
+                    address: "Jl. Tamani",
+                    imageUrl: "https://teknisimobil.com/wp-content/uploads/2018/01/Kunci-yang-Diperlukan-di-Bengkel-Mobil-3.jpg"
                 })
 
             expect(response.status).toEqual(400)
@@ -148,7 +154,25 @@ describe('Partner testing', function () {
                     email: "juju@pro.com",
                     password: hashPassword("rahasia"),
                     phoneNumber: "0808080808",
-                    address: ""
+                    address: "",
+                    imageUrl: "https://teknisimobil.com/wp-content/uploads/2018/01/Kunci-yang-Diperlukan-di-Bengkel-Mobil-3.jpg"
+                })
+
+            expect(response.status).toEqual(400)
+            expect(typeof response.body).toEqual('object')
+            expect(response.body).toHaveProperty('msg')
+            expect(typeof response.body.msg).toEqual('string')
+        })
+        test('POST /partners/register  failed because imageUrl is required', async function () {
+            const response = await request(app)
+                .post('/partners/register')
+                .send({
+                    partnerName: "bengkel jaya",
+                    email: "juju@pro.com",
+                    password: hashPassword("rahasia"),
+                    phoneNumber: "0808080808",
+                    address: "Jl. Tamani",
+                    imageUrl: ""
                 })
 
             expect(response.status).toEqual(400)
@@ -164,7 +188,8 @@ describe('Partner testing', function () {
                     email: "juju@pro.com",
                     password: hashPassword("rahasia"),
                     phoneNumber: "0808080808",
-                    address: "Jl. Tamani"
+                    address: "Jl. Tamani",
+                    imageUrl: "https://teknisimobil.com/wp-content/uploads/2018/01/Kunci-yang-Diperlukan-di-Bengkel-Mobil-3.jpg"
                 })
 
             expect(response.status).toEqual(400)
@@ -180,7 +205,8 @@ describe('Partner testing', function () {
                     email: "jujupro.com",
                     password: hashPassword("rahasia"),
                     phoneNumber: "0808080808",
-                    address: "Jl. Tamani"
+                    address: "Jl. Tamani",
+                    imageUrl: "https://teknisimobil.com/wp-content/uploads/2018/01/Kunci-yang-Diperlukan-di-Bengkel-Mobil-3.jpg"
                 })
 
             expect(response.status).toEqual(400)
@@ -200,7 +226,6 @@ describe('Partner testing', function () {
                 })
 
             expect(response.status).toEqual(200)
-            console.log(response.body, "access tokennnnnn niii<<<<");
             expect(typeof response.body).toEqual('object')
             expect(typeof response.body.access_token).toEqual('string')
             expect(typeof response.body.email).toEqual('string')
@@ -252,7 +277,6 @@ describe('Partner testing', function () {
                 })
                 .send({ "productId": 1, "orderId": 1, "quantity": 3 })
 
-            console.log(response.body, "<<");
             expect(response.status).toEqual(201)
             expect(typeof response.body).toEqual('object')
             expect(typeof response.body.orderId).toEqual('number')
@@ -267,7 +291,6 @@ describe('Partner testing', function () {
                 })
                 .send({ "productId": 1, "orderId": 1, "quantity": 3 })
 
-            console.log(response.body, "<<");
             expect(response.status).toEqual(401)
             expect(typeof response.body).toEqual('object')
             expect(response.body).toHaveProperty('message')
@@ -281,7 +304,6 @@ describe('Partner testing', function () {
                 })
                 .send({ "productId": null, "orderId": 1, "quantity": 3 })
 
-            console.log(response.body, "<<");
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
             expect(response.body).toHaveProperty('message')
@@ -305,7 +327,6 @@ describe('Partner testing', function () {
             expect(typeof response.body[0].Product.type).toEqual('string')
             expect(typeof response.body[0].Product.price).toEqual('number')
             expect(typeof response.body[0].Product.image).toEqual('string')
-            console.log(response.body);
         })
         test('GET /partners/products/:orderId failed because access token is invalid token', async function () {
             const response = await request(app)
@@ -315,7 +336,6 @@ describe('Partner testing', function () {
                 })
                 .send({ "productId": 1, "orderId": 1, "quantity": 3 })
 
-            console.log(response.body, "<<");
             expect(response.status).toEqual(401)
             expect(typeof response.body).toEqual('object')
             expect(response.body).toHaveProperty('message')
@@ -329,7 +349,6 @@ describe('Partner testing', function () {
                 })
                 .send({ "productId": 1, "orderId": 1, "quantity": 3 })
 
-            console.log(response.body, "<<");
             expect(response.status).toEqual(401)
             expect(typeof response.body).toEqual('object')
             expect(response.body).toHaveProperty('message')
@@ -344,7 +363,6 @@ describe('Partner testing', function () {
                 })
                 .send({ "productId": 1, "orderId": 1, "quantity": 3 })
 
-            console.log(response.body, "<<");
             expect(response.status).toEqual(500)
             expect(typeof response.body).toEqual('object')
             expect(response.body).toHaveProperty('message')
@@ -359,7 +377,6 @@ describe('Partner testing', function () {
                     access_token
                 })
 
-            console.log(typeof response.body.message, "<<<>>> alamat typeof");
             expect(response.status).toEqual(200)
             expect(typeof response.body).toEqual('object')
             expect(response.body).toHaveProperty('message', "Email sent successfully")

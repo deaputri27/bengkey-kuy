@@ -187,6 +187,7 @@ class UserController {
             next(error)
         }
     }
+
     static async getOrderDetail(req, res, next) {
         try {
             const { id } = req.params
@@ -217,7 +218,6 @@ class UserController {
         }
     }
 
-
     static async getOrderAll(req, res, next) {
         try {
             const response = await Order.findAll()
@@ -227,7 +227,6 @@ class UserController {
             console.log(err);
         }
     }
-
 
     static async generateMidtransToken(req, res, next) {
         try {
