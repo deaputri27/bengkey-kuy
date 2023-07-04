@@ -1,4 +1,4 @@
-/* const { describe, test, expect } = require('@jest/globals')
+const { describe, test, expect } = require('@jest/globals')
 const request = require('supertest')
 const app = require('../app')
 const models = require('../models')
@@ -16,7 +16,7 @@ access_token = signToken({
     email: partner.email
 })
 
-})
+}) 
 afterAll(async function() {
     await models.sequelize.close()
 })
@@ -239,4 +239,4 @@ describe('Partner testing', function () {
             expect(response.status).toEqual(201)
         })
     })
-}) */
+})
