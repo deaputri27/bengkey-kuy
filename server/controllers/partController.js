@@ -140,8 +140,6 @@ class PartControllers {
 
             const htmlContent = fs.readFileSync('invoice.ejs', 'utf-8');
             const { orderId } = req.params
-
-            const { orderId } = req.params
             const myProducts = await OrderDetail.findAll({
                 attributes: {
                     exclude: ['createdAt', 'updatedAt']
