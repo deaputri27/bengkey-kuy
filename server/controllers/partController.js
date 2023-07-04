@@ -1,45 +1,49 @@
 const { comparePassword } = require('../helper/bcrypt')
 const { signToken } = require('../helper/jwt')
-const { Partner, Product, OrderDetail, User } = require('../models')
-class PartControllers {
 
+const { Product, OrderDetail, User, Order, Partner } = require("../models")
+const nodemailer = require('nodemailer');
+const puppeteer = require('puppeteer');
+const inlineCss = require('inline-css');
+const fs = require('fs');
+const ejs = require('ejs');
+
+class PartControllers {
     static async register(req, res, next) {
         try {
-            const { partnerName, email, password, phoneNumber, address } = req.body
+            const { partnerName, email, password, phoneNumber, address, imageUrl } = req.body
             const createPartner = await Partner.create({
                 partnerName,
                 email,
                 password,
                 phoneNumber,
-                address
-
+                address,
+                imageUrl
             })
             res.status(201).json({ message: `user with id ${createPartner.id} and email ${createPartner.partnerName} has been created` })
             // console.log(createUser, "<<<")
         } catch (error) {
             next(error);
-            console.log(error);
+            // console.log(error);
         }
     }
 
     static async login(req, res, next) {
         try {
             const { email, password } = req.body
+            console.log(req.body, 'req body login userr<<');
             if (!email || !password) {
-                throw { name: "Invalid email/password" }
+                throw { name: "Email and Password is required"} // 401
             }
             const user = await Partner.findOne({ where: { email } })
-
+            console.log(user, "userr<<");
             if (!user) {
-                res.status(401).json({ message: "User not found" })
-                return
+                throw{ name: "User not found"}
             }
             const isValidPassword = comparePassword(password, user.password)
+            console.log(isValidPassword, "valid pass<<");
             if (!isValidPassword) {
-                res.status(401).json({
-                    message: "Invalid email/password"
-                }) // ini juga
-                return
+                throw{ name: "Invalid email/password"}
             }
             const access_token = signToken({
                 id: user.id,
@@ -52,58 +56,58 @@ class PartControllers {
             })
         } catch (error) {
             next(error);
-            console.log(error, "<<err");
+            // console.log(error, "<<err");
         }
     }
 
-    static async loginGoogle(req, res, next) {
-        try {
-            const googleToken = req.headers.google_token
-            console.log(req.headers, "<<<<<");
-            const client = new OAuth2Client(process.env.CLIENTID);
-            const ticket = await client.verifyIdToken({
-              idToken: googleToken,
-              audience: process.env.CLIENTID
-            });
-            const payload = ticket.getPayload();
-            const userid = payload['sub'];
-            const [user, created] = await User.findOrCreate({
-              where: { email: payload.email },
-              defaults: {
-                username: payload.name,
-                password: "deacantik",
-                phoneNumber: "12345",
-                address: "jl.dea",
-              },
-              hooks: false
-            })
-            const access_token = signToken({
-              id: user.id,
-              email: user.email
-            })
-            res.json({ access_token })
-        } catch (error) {
-            next(error);
-            console.log(error);
-        }
-    }
+    // static async loginGoogle(req, res, next) {
+    //     try {
+    //         const googleToken = req.headers.google_token
+    //         console.log(req.headers, "<<<<<");
+    //         const client = new OAuth2Client(process.env.CLIENTID);
+    //         const ticket = await client.verifyIdToken({
+    //           idToken: googleToken,
+    //           audience: process.env.CLIENTID
+    //         });
+    //         const payload = ticket.getPayload();
+    //         const userid = payload['sub'];
+    //         const [user, created] = await User.findOrCreate({
+    //           where: { email: payload.email },
+    //           defaults: {
+    //             username: payload.name,
+    //             password: "deacantik",
+    //             phoneNumber: "12345",
+    //             address: "jl.dea",
+    //           },
+    //           hooks: false
+    //         })
+    //         const access_token = signToken({
+    //           id: user.id,
+    //           email: user.email
+    //         })
+    //         res.json({ access_token })
+    //     } catch (error) {
+    //         next(error);
+    //         console.log(error);
+    //     }
+    // }
 
     static async createOrderDetail(req, res, next) {
         try {
+
             const { orderId, productId, quantity } = req.body;
             console.log(req.body, "<<reqboday");
             if (!productId) {
-              res.status(400).json({ message: "No products provided" });
-              return;
+                throw{ name: "No products provided"}
             }
             const orderDetail = await OrderDetail.create({orderId,quantity,productId});
           
             res.status(201).json(orderDetail);
           } catch (error) {
-            console.log(error);
             next(error)
           }
           
+
     }
 
     static async readOrderDetail(req, res, next) {
@@ -123,8 +127,8 @@ class PartControllers {
             res.status(200).json(myProducts)
 
         } catch (error) {
-            console.log(error);
-            res.status(500).json({ message: "Internal server error" })
+            next(error) //
+            // res.status(500).json({ message: "Internal server error" })
         }
     }
 
@@ -132,28 +136,37 @@ class PartControllers {
         try {
 
             const htmlContent = fs.readFileSync('invoice.ejs', 'utf-8');
-
+            const { orderId } = req.params
             const myProducts = await OrderDetail.findAll({
                 attributes: {
                     exclude: ['createdAt', 'updatedAt']
                 }, include: ['Product', 'Order'],
-                where: { orderId: 1 }
-            })
 
+                where: { orderId: orderId }
+            })
+            // console.log(myProducts, "<<< email send partner");
             let totalPrice = 0
             for (let i = 0; i < myProducts.length; i++) {
                 let price = myProducts[i].Product.price * myProducts[i].quantity
                 totalPrice += price
+                console.log(myProducts[i].Product?.price, "<<<<<>>>HUHIU");
             }
-            // res.status(201).json(myProducts)
 
-            const findUser = await User.findByPk(req.user.id)
-            // res.status(201).json(findUser)
+            // res.json(myProducts)
+            const id = req.params.orderId
+            const order = await Order.findAll({
+                include: ['User'],
+                where: { id }
+            })
+            // res.json(order)
 
-            const renderedTemplate = ejs.render(htmlContent, { myProducts, findUser, totalPrice, FormatRupiah });
+            const findPartner = await Partner.findByPk(req.partner.id)
+            // console.log(findPartner);
+
+            const renderedTemplate = ejs.render(htmlContent, { myProducts, order, findPartner, totalPrice });
 
             const inlineHtml = await inlineCss(renderedTemplate, {
-                url: 'file://path/to/bootstrap.min.css',
+                url: 'file://path/to/bootstrap.min.css'
             });
 
             async function convertHtmlToImage(renderedTemplate) {
@@ -180,7 +193,6 @@ class PartControllers {
                         top: "30px",
                         bottom: "20px",
                         left: "150px",
-
                     },
                     printBackground: true,
                 });
@@ -196,19 +208,19 @@ class PartControllers {
                     service: 'Gmail',
                     auth: {
                         user: 'fastwheel007official@gmail.com',
-                        pass: 'pwxrenejewkscpus',
+                        pass: 'zalyvjzqlhawrlmh',
                     },
                 })
 
                 const mailOptions = {
                     from: 'fastwheel007official@gmail.com',
-                    to: 'fauziwahyudi12@gmail.com',
-                    subject: 'Terima kasih atas pembayaran Anda - fastWheel007 - TRANSACTION_4689571',
+                    to: order[0].User.email,
+                    subject: "Terima kasih atas pembayaran Anda - Fast007 - " + "TRANSACTION_" + "24007" + myProducts[0].orderId,
                     text: 'This is the plain text body of the email',
                     html: inlineHtml,
                     attachments: [
                         {
-                            filename: 'invoice.pdf',
+                            filename: "INV" + "-" + "TRANSACTION_" + "24007" + myProducts[0].orderId + ".pdf" ,
                             content: pdfBuffer,
                             contentType: 'application/pdf',
                         },
@@ -222,13 +234,12 @@ class PartControllers {
 
             res.status(200).json({ message: 'Email sent successfully' });
 
-
         } catch (error) {
-            console.error(error);
-            res.status(500).send('Failed to generate PDF and send email.');
+            next(error)
+            // console.error(error);
+            // res.status(500).send('Failed to generate PDF and send email.');
         }
     }
-
 }
 
 module.exports = PartControllers

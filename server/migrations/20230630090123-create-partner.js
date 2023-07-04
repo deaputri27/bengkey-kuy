@@ -52,6 +52,14 @@ module.exports = {
           notNull: true,
         }
       },
+      imageUrl: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+          notNull: true,
+        }
+      },
       location: {
         type: Sequelize.GEOMETRY('POINT')
       },

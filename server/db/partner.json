@@ -8,7 +8,8 @@
         "location": {
             "lat": "-6.252347204645779",
             "lng": "106.7778840156567"
-        }
+        },
+        "imageUrl": "https://www.wikaautocare.com/wp-content/uploads/2020/11/tips-sukses-bengkel-mobil-1024x576.jpg"
     },
     {
         "partnerName": "Precision Motors",
@@ -19,7 +20,8 @@
         "location": {
             "lat": "-6.253850559899451",
             "lng": "106.78189075315454"
-        }
+        },
+        "imageUrl": "https://image.indonetwork.co.id/normal/categories/1520222067.jpg"
     },
     {
         "partnerName": "Speed & Service Garage",
@@ -30,7 +32,8 @@
         "location": {
             "lat": "-6.254650685568328",
             "lng": "106.78227945714093"
-        }
+        },
+        "imageUrl": "https://reparasimobil.com/wp-content/uploads/2020/11/cibubur.jpeg"
     },
     {
         "partnerName": "The Car Doctor's Garage",
@@ -41,6 +44,7 @@
         "location": {
             "lat": "-6.254723373007098",
             "lng": "106.77916537290982"
-        }
+        },
+        "imageUrl": "https://3.bp.blogspot.com/-xbXQa5ciTZs/Vf_JQjQKZSI/AAAAAAAAABg/Ia1F98CFQy4/s1600/Publication1.jpg"
     }
 ]

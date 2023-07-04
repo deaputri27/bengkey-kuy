@@ -2,7 +2,6 @@ const { User, Partner, Order } = require('../models')
 const { hashPassword } = require('./bcrypt')
 
 async function bulkInsertPartner() {
-
     await Partner.destroy({
         truncate: true,
         restartIdentity: true,
@@ -19,7 +18,8 @@ async function bulkInsertPartner() {
             email: "bengkel@pro.com",
             password: "rahasia",
             phoneNumber: "0808080808",
-            address: "Jl. Tamani"
+            address: "Jl. Tamani",
+            imageUrl: "https://teknisimobil.com/wp-content/uploads/2018/01/Kunci-yang-Diperlukan-di-Bengkel-Mobil-3.jpg"
         }
     )
   
