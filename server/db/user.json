@@ -16,5 +16,11 @@
         "email": "k@mail.com",
         "password": "12345",
         "phoneNumber": "0880808008"
+    },
+    {
+        "username": "johana huno",
+        "email": "jh@mail.com",
+        "password": "12345",
+        "phoneNumber": "0880808008"
     }
 ]
