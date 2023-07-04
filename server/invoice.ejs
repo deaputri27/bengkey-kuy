@@ -55,7 +55,8 @@
         }
 
         .logo img {
-            height: 60px;
+            height: 150px;
+            width: 150px;
         }
 
         .top-left p {
@@ -217,15 +218,15 @@
     <div class="my-5 page" size="A4">
         <div class="p-5">
             <section class="top-content bb d-flex justify-content-between">
-                <div class="logo">
-                    <img src="logo.png" alt="" class="img-fluid">
+                <div class="logo" style="margin-top: 5px;">
+                    <img src="https://i.ibb.co/7vSy59Q/fast2.png" alt="Logo" class="img-fluid">
                 </div>
                 <div class="top-left">
                     <div class="graphic-path">
                         <p>Invoice</p>
                     </div>
                     <div class="position-relative">
-                        <p>Invoice No. <span>XXXX</span></p>
+                        <p>Invoice No. <span><%= "TRANSACTION_" + "24007" + myProducts[0].orderId %></span></p>
                     </div>
                 </div>
             </section>
@@ -235,24 +236,23 @@
                     <div class="row bb pb-3">
                         <div class="col-7">
                             <p>Partner,</p>
-                            <h2>Bambang</h2>
-                            <p class="address"> 777 Brockton Avenue, <br> Abington MA 2351, <br>Vestavia Hills AL </p>
-                            <div class="txn mt-2">TXN: XXXXXXX</div>
+                            <h2><%= findPartner.partnerName %></h2>
+                            <p class="address"><%= findPartner.email %>, <br> <%= findPartner.phoneNumber %>, <br> <%= findPartner.address %> </p>
+                            
                         </div>
                         <div class="col-5">
                             <p>Customer,</p>
-                            <h2><%= findUser.username %></h2>
-                            <p class="address"><%= findUser.email %>, <br> <%= findUser.phoneNumber %> </p>
-                            <div class="txn mt-2">TXN: XXXXXXX</div>
+                            <h2><%= order[0].User.username %></h2>
+                            <p class="address"><%= order[0].User.email %>, <br> <%= order[0].User.phoneNumber %> </p>
                         </div>
                     </div>
                     <div class="row extra-info pt-3">
                         <div class="col-7">
-                            <p>Payment Method: <span>Bank BCA</span></p>
-                            <p>Order Number: <span>#868</span></p>
+                            <p>Payment Method: <span>Bank Transfer</span></p>
+                            <p>Order Number: <span><%= "#" + myProducts[0].orderId %></span></p>
                         </div>
                         <div class="col-5">
-                            <p>Deliver Date: <span>10-04.2021</span></p>
+                            <p>Deliver Date: <span><%= new Date(myProducts[0].Order.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %></span></p>
                         </div>
                     </div>
                 </div>
@@ -284,9 +284,9 @@
                                     </div>
                                 </div>
                             </td>
-                            <td><%= myProducts[i].Product.price %></td>
+                            <td><%= myProducts[i].Product.price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) %></td>
                             <td><%= myProducts[i].quantity %></td>
-                            <td><%= myProducts[i].Product.price * myProducts[i].quantity %></td>
+                            <td><%= (myProducts[i].Product.price * myProducts[i].quantity).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) %></td>
                         </tr>
                         <% } %>
                     </tbody>
@@ -298,34 +298,21 @@
                     <div class="col-8">
                         <p class="m-0 font-weight-bold"> Problem: </p>
                         <p><%= myProducts[0].Order.problem %></p>
-                        <p class="m-0 font-weight-bold"> Car: </p>
-                        <p><%= myProducts[0].Order.car %></p>
+                        <p class="m-0 font-weight-bold"> Car / Lisence: </p>
+                        <p><%= myProducts[0].Order.car %> <%= myProducts[0].Order.carType %> / <%= myProducts[0].Order.license %></p>
                     </div>
                     <div class="col-4">
                         <table class="table border-0 table-hover">
-                            <!-- <tr>
-                                <td>Sub Total:</td>
-                                <td>Rp 2.050.000,-</td>
-                            </tr>
-                            <tr>
-                                <td>Tax:</td>
-                                <td>0</td>
-                            </tr>
-                            <tr>
-                                <td>Deliver:</td>
-                                <td>0</td>
-                            </tr> -->
-                            <!-- <tfoot> -->
                                 <tr>
                                     <td>Total:</td>
-                                    <td><%= totalPrice %>,-</td>
+                                    <td><%= totalPrice.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) %>,-</td>
                                 </tr>
                             <!-- </tfoot> -->
                         </table>
 
                         <!-- Signature -->
                         <div class="col-12">
-                            <img src="signature.png" class="img-fluid" alt="">
+                            <img src="https://i.ibb.co/4mpcVjc/signature.png" class="img-fluid" alt="">
                             <p class="text-center m-0"> Director Signature </p>
                         </div>
                     </div>
@@ -338,7 +325,7 @@
             <footer>
                 <hr>
                 <p class="m-0 text-center">
-                    View THis Invoice Online At - <a href="#!"> invoice/fastWheel.com/#868 </a>
+                    View THis Invoice Online At - <a href="#!"> invoice/fast007offcial.com/#868 </a>
                 </p>
                 <div class="social pt-3">
                     <span class="pr-2">
@@ -347,15 +334,15 @@
                     </span>
                     <span class="pr-2">
                         <i class="fas fa-envelope"></i>
-                        <span>fastwheel007@gmail.com.com</span>
+                        <span>fast007officiall@gmail.com</span>
                     </span>
                     <span class="pr-2">
                         <i class="fab fa-facebook-f"></i>
-                        <span>/fastwheel007</span>
+                        <span>/fast007</span>
                     </span>
                     <span class="pr-2">
                         <i class="fab fa-youtube"></i>
-                        <span>/fastwheel007</span>
+                        <span>/fast007</span>
                     </span>
                 </div>
             </footer>

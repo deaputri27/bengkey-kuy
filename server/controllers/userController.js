@@ -1,12 +1,8 @@
 const { comparePassword } = require('../helper/bcrypt')
 const { signToken } = require('../helper/jwt')
 const { User, OrderDetail, Product, Order } = require("../models")
-
 // const { OAuth2Client } = require('google-auth-library');
 const midtransClient = require('midtrans-client');
-const { CoreApi } = require('midtrans-client');
-const { createTransaction } = require('midtrans-client');
-const { sequelize } = require('../models'); 
 
 class UserController {
     static async register(req, res, next) {
@@ -124,11 +120,7 @@ class UserController {
     static async generateMidtransToken(req, res, next) {
         try {
             const { orderId } = req.params
-
             const findUser = await User.findByPk(req.user.id)
-            // if (findUser.isSubscribed) {
-            //     throw { name: "already_subscribed" }
-            // }
 
             let snap = new midtransClient.Snap({
                 isProduction: false,
@@ -183,8 +175,6 @@ class UserController {
 
             const midtransToken = await snap.createTransaction(parameter)
             // console.log(midtransToken, ">>>>>>>>>>")
-
-
             res.status(201).json(midtransToken)
 
         } catch (error) {
@@ -194,15 +184,15 @@ class UserController {
 
     static async paymentStatus(req, res, next) {
         try {
-
             // console.log(req.body.transaction_status);
             const midtransRespond = req.body.transaction_status
             const id = req.body.order_id
+            const totalPrice = req.body.gross_amount
             // console.log(orderId);
 
             if (midtransRespond === "settlement" || midtransRespond === "capture") {
-                await Order.update({ paymentStatus: "isPaid" }, { where: { id } })
-                
+                await Order.update({ paymentStatus: "isPaid", totalPrice: Number(totalPrice) }, { where: { id } })
+
                 res.status(200).json("pembayaran berhasil")
             }
 

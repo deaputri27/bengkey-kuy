@@ -7,7 +7,7 @@ router.post('/register', userController.register)
 router.post('/login', userController.login)
 // router.post('/google-signin', userController.loginGoogle)
 
-router.post("/payment-notification", userController.paymentStatus)
+router.post("/payment-status", userController.paymentStatus)
 
 router.use(authentication)
 router.get("/order", userController.getOrderAll)
