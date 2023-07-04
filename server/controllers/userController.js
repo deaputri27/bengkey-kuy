@@ -29,21 +29,17 @@ class UserController {
             const { email, password } = req.body
             console.log(req.body, 'req body login userr<<');
             if (!email || !password) {
-                throw { name: "Invalid email/password" }
+                throw { name: "Email and Password is required"} // 401
             }
             const user = await User.findOne({ where: { email } })
             console.log(user, "userr<<");
             if (!user) {
-                res.status(401).json({ message: "InvalidToken" })
-                return
+                throw{ name: "User not found"}
             }
             const isValidPassword = comparePassword(password, user.password)
             console.log(isValidPassword, "valid pass<<");
             if (!isValidPassword) {
-                res.status(401).json({
-                    message: "InvalidToken"
-                }) // ini juga
-                return
+                throw{ name: "Invalid email/password"}
             }
             const access_token = signToken({
                 id: user.id,

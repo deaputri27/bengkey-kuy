@@ -6,8 +6,7 @@ const authenticationPartner = async (req, res, next) => {
     const {access_token} = req.headers
     try {
         if (!access_token) {
-            res.status(401).json({ message: `invalid token` })
-            return
+            throw { name: 'JsonWebTokenError' }
         }
         
         const partnerId = verifyToken(access_token)
@@ -16,8 +15,7 @@ const authenticationPartner = async (req, res, next) => {
         // console.log(partner);
     
         if (!partner) {
-            res.status(401).json({ message: `invalid token` })
-            return
+            throw { name: 'JsonWebTokenError' }
         }
     
         req.partner = partner;
