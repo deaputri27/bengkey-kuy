@@ -5,8 +5,8 @@
         "partnerId": 1,
         "status": "active",
         "location": {
-            "lat": "-6.942981263106864",
-            "lng": "107.59278847659893"
+            "lng": "-6.942981263106864",
+            "lat": "107.59278847659893"
         },
         "totalPrice": 1500000,
         "paymentStatus": "isPaid",
@@ -20,8 +20,8 @@
         "partnerId": 2,
         "status": "active",
         "location": {
-            "lat": "-6.9439994342171225",
-            "lng": "107.5904275402039"
+            "lng": "-6.9439994342171225",
+            "lat": "107.5904275402039"
         },
         "totalPrice": 600000,
         "paymentStatus": "isPaid",
@@ -35,8 +35,8 @@
         "partnerId": 1,
         "status": "active",
         "location": {
-            "lat": "-6.940669415817259",
-            "lng": "107.5925576773082"
+            "lng": "-6.940669415817259",
+            "lat": "107.5925576773082"
         },
         "totalPrice": 145000,
         "paymentStatus": "isPaid",
