@@ -6,8 +6,7 @@ const authentication = async (req, res, next) => {
     const {access_token} = req.headers
     try {
         if (!access_token) {
-            res.status(401).json({ message: `invalid token` })
-            return
+            throw{name: "JsonWebTokenError"}
         }
         
         const userId = verifyToken(access_token)
@@ -16,8 +15,7 @@ const authentication = async (req, res, next) => {
         // console.log(user);
     
         if (!user) {
-            res.status(401).json({ message: `invalid token` })
-            return
+            throw{name: "JsonWebTokenError"}
         }
     
         req.user = user;

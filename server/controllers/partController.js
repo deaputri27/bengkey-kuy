@@ -22,29 +22,27 @@ class PartControllers {
             res.status(201).json({ message: `user with id ${createPartner.id} and email ${createPartner.partnerName} has been created` })
             // console.log(createUser, "<<<")
         } catch (error) {
-            // next(error);
-            console.log(error);
+            next(error);
+            // console.log(error);
         }
     }
 
     static async login(req, res, next) {
         try {
             const { email, password } = req.body
+            console.log(req.body, 'req body login userr<<');
             if (!email || !password) {
-                throw { name: "Invalid email/password" }
+                throw { name: "Email and Password is required"} // 401
             }
             const user = await Partner.findOne({ where: { email } })
-
+            console.log(user, "userr<<");
             if (!user) {
-                res.status(401).json({ message: "User not found" })
-                return
+                throw{ name: "User not found"}
             }
             const isValidPassword = comparePassword(password, user.password)
+            console.log(isValidPassword, "valid pass<<");
             if (!isValidPassword) {
-                res.status(401).json({
-                    message: "Invalid email/password"
-                }) // ini juga
-                return
+                throw{ name: "Invalid email/password"}
             }
             const access_token = signToken({
                 id: user.id,
@@ -57,7 +55,7 @@ class PartControllers {
             })
         } catch (error) {
             next(error);
-            console.log(error, "<<err");
+            // console.log(error, "<<err");
         }
     }
 
@@ -99,14 +97,12 @@ class PartControllers {
             const { orderId, productId, quantity } = req.body;
             console.log(req.body, "<<reqboday");
             if (!productId) {
-              res.status(400).json({ message: "No products provided" });
-              return;
+                throw{ name: "No products provided"}
             }
             const orderDetail = await OrderDetail.create({orderId,quantity,productId});
           
             res.status(201).json(orderDetail);
           } catch (error) {
-            console.log(error);
             next(error)
           }
           
@@ -130,8 +126,8 @@ class PartControllers {
             res.status(200).json(myProducts)
 
         } catch (error) {
-            console.log(error);
-            res.status(500).json({ message: "Internal server error" })
+            next(error) //
+            // res.status(500).json({ message: "Internal server error" })
         }
     }
 
@@ -147,11 +143,12 @@ class PartControllers {
 
                 where: { orderId: orderId }
             })
-
+            // console.log(myProducts, "<<< email send partner");
             let totalPrice = 0
             for (let i = 0; i < myProducts.length; i++) {
                 let price = myProducts[i].Product.price * myProducts[i].quantity
                 totalPrice += price
+                console.log(myProducts[i].Product?.price, "<<<<<>>>HUHIU");
             }
 
             // res.json(myProducts)
@@ -216,7 +213,7 @@ class PartControllers {
 
                 const mailOptions = {
                     from: 'fastwheel007official@gmail.com',
-                    to: 'fauziwahyudi12@gmail.com',
+                    to: order[0].User.email,
                     subject: "Terima kasih atas pembayaran Anda - Fast007 - " + "TRANSACTION_" + "24007" + myProducts[0].orderId,
                     text: 'This is the plain text body of the email',
                     html: inlineHtml,
@@ -237,8 +234,9 @@ class PartControllers {
             res.status(200).json({ message: 'Email sent successfully' });
 
         } catch (error) {
-            console.error(error);
-            res.status(500).send('Failed to generate PDF and send email.');
+            next(error)
+            // console.error(error);
+            // res.status(500).send('Failed to generate PDF and send email.');
         }
     }
 }
