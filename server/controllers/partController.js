@@ -90,23 +90,20 @@ class PartControllers {
 
     static async createOrderDetail(req, res, next) {
         try {
-            const { orderId, products } = req.body
-            products.map((el) => {
-                el.orderId = orderId
-            })
-            
-            await OrderDetail.bulkCreate(products)
-        
-            res.json({ message: "order created"})
-
-        } catch (error) {
-            console.log(error);
-            if (error.name === "NotFound") {
-                res.status(404).json({ message: "Product not found" })
-            } else {
-                res.status(500).json({ message: "Internal server error" })
+            const { orderId, productId, quantity } = req.body;
+            console.log(req.body, "<<reqboday");
+            if (!productId) {
+              res.status(400).json({ message: "No products provided" });
+              return;
             }
-        }
+            const orderDetail = await OrderDetail.create({orderId,quantity,productId});
+          
+            res.status(201).json(orderDetail);
+          } catch (error) {
+            console.log(error);
+            next(error)
+          }
+          
     }
 
     static async readOrderDetail(req, res, next) {
@@ -123,7 +120,6 @@ class PartControllers {
                 },
                 where: { orderId: orderId }
             })
-            // console.log(myProducts, ".>>>>>>>>>>>>>>>>");
             res.status(200).json(myProducts)
 
         } catch (error) {

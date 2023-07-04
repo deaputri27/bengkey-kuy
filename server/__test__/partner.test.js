@@ -4,12 +4,23 @@ const app = require('../app')
 const models = require('../models')
 const { hashPassword } = require('../helper/bcrypt')
 const bulkInsertPartner = require('../helper/PartnerBulkInsert')
+const { signToken } = require('../helper/jwt')
+const bulkInsertCust = require('../helper/UserBulkInsert')
+
+let access_token = ""
 beforeAll(async function(){
-return bulkInsertPartner()
+await bulkInsertCust()
+const partner = await bulkInsertPartner()
+access_token = signToken({
+    id: partner.id,
+    email: partner.email
+})
+
 })
 afterAll(async function() {
     await models.sequelize.close()
 })
+
 describe('Partner testing', function () {
     describe('Register partner', function () {
         test('POST /partners/register success', async function () {
@@ -202,15 +213,30 @@ describe('Partner testing', function () {
             expect(response.body).toHaveProperty('message', "User not found")
             expect(typeof response.body.message).toEqual('string')
         })
+        test('POST /partners/login failed because email is empty', async function(){
+            const response = await request(app)
+            .post('/partners/login')
+            .send({
+                email: "",
+                password: "rahasia",
+            })
+            expect(response.status).toEqual(401)
+            expect(typeof response.body).toEqual('object')
+            expect(response.body).toHaveProperty('message', "Invalid email/password")
+            expect(typeof response.body.message).toEqual('string')
+        })
     })
     describe('Create Order Detail', function(){
-        test('POST /partners/products/:productId success', async function(){
+        test('POST /partners/products success', async function(){
             const response = await request(app)
-            .post('/partners/products/:productId')
+            .post('/partners/products')
             .set({
                 access_token
             })
-            
+            .send({"productId": 1, "orderId": 1, "quantity": 3})
+           
+            console.log(response.status, "<<");
+            expect(response.status).toEqual(201)
         })
     })
 })

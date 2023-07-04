@@ -183,15 +183,15 @@ class UserController {
         try {
             const orderId = req.params.orderId
             const { productId, quantity } = req.body
-
             const listOrder = await OrderDetail.create({ orderId: orderId, productId, quantity })
-
+            console.log(listOrder, "<< ini order id controller");
+            
             res.status(201).json(listOrder)
         } catch (error) {
+            console.log(error, "<<<order detail add");
             next(error)
         }
     }
-
     static async getOrderDetail(req, res, next) {
         try {
             const { id } = req.params

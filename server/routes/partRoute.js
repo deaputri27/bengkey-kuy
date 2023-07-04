@@ -8,10 +8,9 @@ router.post('/login', partControllers.login)
 // router.post('/google-signin', partControllers.loginGoogle)
 
 router.use(authenticationPartner)
-router.post('/products/:productId', partControllers.createOrderDetail)
+router.post('/products', partControllers.createOrderDetail)
 router.get('/products/:orderId', partControllers.readOrderDetail)
 
-router.post('/products', partControllers.createOrderDetail)
 router.post('/send-email', partControllers.sendEmail)
 
 

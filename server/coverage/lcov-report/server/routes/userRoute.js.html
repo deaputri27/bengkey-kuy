@@ -100,81 +100,75 @@
 <a name='L35'></a><a href='#L35'>35</a>
 <a name='L36'></a><a href='#L36'>36</a>
 <a name='L37'></a><a href='#L37'>37</a>
-<a name='L38'></a><a href='#L38'>38</a>
-<a name='L39'></a><a href='#L39'>39</a>
-<a name='L40'></a><a href='#L40'>40</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<a name='L38'></a><a href='#L38'>38</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">const express = require('express')
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span></td><td class="text"><pre class="prettyprint lang-js">const express = require('express')
 const userController = require('../controllers/userController')
 const authentication = require('../middleware/authentication')
 const router = express.Router()
 &nbsp;
-router.post('/register', userController.register)
-router.post('/login', userController.login)
-router.post('/google-signin', userController.loginGoogle)
+router.post('/register', userController.register) //
+router.post('/login', userController.login) //
+router.post('/google-signin', userController.loginGoogle) //
 &nbsp;
 &nbsp;
 router.use(authentication)
 router.get("/distance", userController.findStoresByRadius)
-router.post("/order", userController.createOrder)
+router.post("/order", userController.createOrder) //
+router.post("/process-transaction", userController.generateMidtransToken)
+router.post('/review/:id', userController.review) //
+router.get('/review/:id', userController.getReview) //
+router.get("/detail/:id", userController.getOrderDetail) //
 router.put("/order/:orderId", userController.updateProblem)
-router.put("/order/status/:orderId", userController.updateStatus)
+router.put("/order/status/:orderId", userController.updateStatus)//
+router.get("/order/detail/:orderId", userController.getOrder)//
 &nbsp;
 router.post("/order/detail/:orderId", userController.addOrderDetail)
 &nbsp;
 &nbsp;
-router.get("/detail/:id", userController.getOrderDetail)
 &nbsp;
 &nbsp;
-&nbsp;
-router.post('/review/:id', userController.review)
-router.get('/review/:id', userController.getReview)
-&nbsp;
-router.get('/review/:id', userController.getReview)
 &nbsp;
 &nbsp;
 &nbsp;
 &nbsp;
 &nbsp;
 // router.use(authentication)
-router.post("/process-transaction", userController.generateMidtransToken)
 &nbsp;
 &nbsp;
 &nbsp;
@@ -187,7 +181,7 @@ module.exports = router</pre></td></tr></table></pre>
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-07-03T12:42:57.656Z
+                at 2023-07-04T02:59:04.769Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
