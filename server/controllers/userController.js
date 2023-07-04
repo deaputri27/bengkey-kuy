@@ -292,8 +292,9 @@ class UserController {
         try {
             // distance on meter unit
             const distance = req.query.distance || 10000;
-            const long = req.query.long || "-6.260576726969987";
-            const lat = req.query.lat || "106.78171420171469";
+            const {long, lat} = req.body
+            // const long = req.query.long || "-6.260576726969987";
+            // const lat = req.query.lat || "106.78171420171469";
 
             let result = await sequelize.query(
                 `select
