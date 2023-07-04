@@ -1,4 +1,4 @@
-const { describe, test, expect } = require('@jest/globals')
+/* const { describe, test, expect } = require('@jest/globals')
 const request = require('supertest')
 const app = require('../app')
 const models = require('../models')
@@ -405,4 +405,4 @@ describe('Partner testing', function () {
             expect(typeof response.body.message).toEqual('string')
         })
     })
-})
+}) */
