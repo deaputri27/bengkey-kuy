@@ -1,8 +1,13 @@
 const { comparePassword } = require('../helper/bcrypt')
 const { signToken } = require('../helper/jwt')
-const { Partner, Product, OrderDetail, User } = require('../models')
-class PartControllers {
+const { Product, OrderDetail, User, Order, Partner } = require("../models")
+const nodemailer = require('nodemailer');
+const puppeteer = require('puppeteer');
+const inlineCss = require('inline-css');
+const fs = require('fs');
+const ejs = require('ejs');
 
+class PartControllers {
     static async register(req, res, next) {
         try {
             const { partnerName, email, password, phoneNumber, address } = req.body
@@ -12,12 +17,11 @@ class PartControllers {
                 password,
                 phoneNumber,
                 address
-
             })
             res.status(201).json({ message: `user with id ${createPartner.id} and email ${createPartner.partnerName} has been created` })
             // console.log(createUser, "<<<")
         } catch (error) {
-            next(error);
+            // next(error);
             console.log(error);
         }
     }
@@ -101,11 +105,7 @@ class PartControllers {
 
         } catch (error) {
             console.log(error);
-            if (error.name === "NotFound") {
-                res.status(404).json({ message: "Product not found" })
-            } else {
-                res.status(500).json({ message: "Internal server error" })
-            }
+            res.status(500).json({ message: "Internal server error" })
         }
     }
 
@@ -136,12 +136,14 @@ class PartControllers {
         try {
 
             const htmlContent = fs.readFileSync('invoice.ejs', 'utf-8');
+            const { orderId } = req.params
 
             const myProducts = await OrderDetail.findAll({
                 attributes: {
                     exclude: ['createdAt', 'updatedAt']
                 }, include: ['Product', 'Order'],
-                where: { orderId: 1 }
+
+                where: { orderId: orderId }
             })
 
             let totalPrice = 0
@@ -149,15 +151,22 @@ class PartControllers {
                 let price = myProducts[i].Product.price * myProducts[i].quantity
                 totalPrice += price
             }
-            // res.status(201).json(myProducts)
 
-            const findUser = await User.findByPk(req.user.id)
-            // res.status(201).json(findUser)
+            // res.json(myProducts)
+            const id = req.params.orderId
+            const order = await Order.findAll({
+                include: ['User'],
+                where: { id }
+            })
+            // res.json(order)
 
-            const renderedTemplate = ejs.render(htmlContent, { myProducts, findUser, totalPrice, FormatRupiah });
+            const findPartner = await Partner.findByPk(req.partner.id)
+            // console.log(findPartner);
+
+            const renderedTemplate = ejs.render(htmlContent, { myProducts, order, findPartner, totalPrice });
 
             const inlineHtml = await inlineCss(renderedTemplate, {
-                url: 'file://path/to/bootstrap.min.css',
+                url: 'file://path/to/bootstrap.min.css'
             });
 
             async function convertHtmlToImage(renderedTemplate) {
@@ -184,7 +193,6 @@ class PartControllers {
                         top: "30px",
                         bottom: "20px",
                         left: "150px",
-
                     },
                     printBackground: true,
                 });
@@ -200,19 +208,19 @@ class PartControllers {
                     service: 'Gmail',
                     auth: {
                         user: 'fastwheel007official@gmail.com',
-                        pass: 'pwxrenejewkscpus',
+                        pass: 'zalyvjzqlhawrlmh',
                     },
                 })
 
                 const mailOptions = {
                     from: 'fastwheel007official@gmail.com',
                     to: 'fauziwahyudi12@gmail.com',
-                    subject: 'Terima kasih atas pembayaran Anda - fastWheel007 - TRANSACTION_4689571',
+                    subject: "Terima kasih atas pembayaran Anda - Fast007 - " + "TRANSACTION_" + "24007" + myProducts[0].orderId,
                     text: 'This is the plain text body of the email',
                     html: inlineHtml,
                     attachments: [
                         {
-                            filename: 'invoice.pdf',
+                            filename: "INV" + "-" + "TRANSACTION_" + "24007" + myProducts[0].orderId + ".pdf" ,
                             content: pdfBuffer,
                             contentType: 'application/pdf',
                         },
@@ -226,13 +234,11 @@ class PartControllers {
 
             res.status(200).json({ message: 'Email sent successfully' });
 
-
         } catch (error) {
             console.error(error);
             res.status(500).send('Failed to generate PDF and send email.');
         }
     }
-
 }
 
 module.exports = PartControllers
