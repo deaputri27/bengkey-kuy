@@ -20,7 +20,7 @@ async function bulkInsertCust() {
       restartIdentity: true,
       cascade: true,
     });
-
+  
     await Order.destroy({
       truncate: true,
       restartIdentity: true,

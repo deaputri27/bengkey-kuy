@@ -56,38 +56,38 @@ class UserController {
         }
     }
 
-    static async loginGoogle(req, res, next) {
-        try {
-            const googleToken = req.headers.google_token
-            console.log(req.headers, "<<<<<");
-            const client = new OAuth2Client(process.env.CLIENTID);
-            const ticket = await client.verifyIdToken({
-                idToken: googleToken,
-                audience: process.env.CLIENTID
-            });
-            const payload = ticket.getPayload();
-            const userid = payload['sub'];
-            const [user, created] = await User.findOrCreate({
-                where: { email: payload.email },
-                defaults: {
-                    username: payload.name,
-                    password: "deacantik",
-                    phoneNumber: "12345",
-                    address: "jl.dea",
-                },
-                hooks: false
-            })
-            const access_token = signToken({
-                id: user.id,
-                email: user.email
-            })
-            res.json({ access_token })
+    // static async loginGoogle(req, res, next) {
+    //     try {
+    //         const googleToken = req.headers.google_token
+    //         console.log(req.headers, "<<<<<");
+    //         const client = new OAuth2Client(process.env.CLIENTID);
+    //         const ticket = await client.verifyIdToken({
+    //             idToken: googleToken,
+    //             audience: process.env.CLIENTID
+    //         });
+    //         const payload = ticket.getPayload();
+    //         const userid = payload['sub'];
+    //         const [user, created] = await User.findOrCreate({
+    //             where: { email: payload.email },
+    //             defaults: {
+    //                 username: payload.name,
+    //                 password: "deacantik",
+    //                 phoneNumber: "12345",
+    //                 address: "jl.dea",
+    //             },
+    //             hooks: false
+    //         })
+    //         const access_token = signToken({
+    //             id: user.id,
+    //             email: user.email
+    //         })
+    //         res.json({ access_token })
 
-        } catch (error) {
-            next(error)
-            console.log(error);
-        }
-    }
+    //     } catch (error) {
+    //         next(error)
+    //         console.log(error);
+    //     }
+    // }
 
     static async review(req, res, next) {
         try {
@@ -103,8 +103,8 @@ class UserController {
             })
             res.status(200).json({ postReview })
         } catch (err) {
-            // next(err)
-            console.log(err);
+            next(err)
+            // console.log(err);
         }
     }
 

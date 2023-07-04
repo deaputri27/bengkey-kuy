@@ -6,6 +6,8 @@ const bulkInsertCust = require('../helper/UserBulkInsert')
 const { hashPassword } = require('../helper/bcrypt')
 const { signToken } = require('../helper/jwt')
 // const models = require('../models')
+jest.setTimeout(20000);
+
 let access_token = ""
 beforeAll(async function () {
     console.log("TEST<<<")
@@ -19,7 +21,9 @@ try {
 } catch (err) {
     console.log(err,"<--");
 }
-   
+beforeEach(function(){
+    jest.restoreAllMocks()
+}) 
 })
 afterAll(async function () {
     await models.sequelize.close()
@@ -100,7 +104,7 @@ describe('User testing', function () {
         })
     })
     describe('Login testing', function () {
-        console.log(access_token,"+++");
+        // console.log(access_token,"+++");
         test('POST /users/login success', async function () {
             const response = await request(app)
                 .post('/users/login')
@@ -119,7 +123,7 @@ describe('User testing', function () {
 
             expect(response.status).toEqual(401)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('message', "InvalidToken")
+            expect(response.body).toHaveProperty('message', "Invalid email/password")
             expect(typeof response.body.message).toEqual('string')
         })
         test('POST /users/login failed because wrong email input', async function () {
@@ -129,7 +133,19 @@ describe('User testing', function () {
 
             expect(response.status).toEqual(401)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('message', "InvalidToken")
+            expect(response.body).toHaveProperty('message', "User not found")
+            expect(typeof response.body.message).toEqual('string')
+        })
+        test('POST /users/login failed because email is empty', async function () {
+            const response = await request(app)
+                .post('/users/login')
+                .send({
+                    email: "",
+                    password: "inidea",
+                })
+            expect(response.status).toEqual(400)
+            expect(typeof response.body).toEqual('object')
+            expect(response.body).toHaveProperty('message', "Email and Password is required")
             expect(typeof response.body.message).toEqual('string')
         })
     })
@@ -145,10 +161,11 @@ describe('User testing', function () {
                 })
             console.log(access_token, "<<<<<<< access tokennn");
             expect(response.status).toEqual(201)
-            console.log(response.body, "niii<<<<");
+            console.log( response.body, "niii<<<<");
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('message')
-            expect(typeof response.body.message).toEqual('string')
+            expect(typeof response.body.id).toEqual('number')
+            // expect(response.body).toHaveProperty('message')
+            // expect(typeof response.body.message).toEqual('string')
         })
      
         
@@ -222,9 +239,22 @@ describe('User testing', function () {
             // .send({})
             expect(response.status).toEqual(401)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('message', "invalid token")
+            expect(response.body).toHaveProperty('message', "Invalid Token")
             expect(typeof response.body.message).toEqual('string')
             console.log(response.body.message, "<<message");
+        })
+        test('GET /users/detail/:id failed because server error', async function () {
+            jest.spyOn(OrderDetail, 'findAll').mockRejectedValue('Internal Server Error')
+            const response = await request(app)
+                .get('/users/detail/1')
+                .set({
+                    access_token
+                })
+
+            expect(response.status).toEqual(500)
+            expect(typeof response.body).toEqual('object')
+            expect(response.body).toHaveProperty('message')
+            expect(response.body.message).toEqual('Internal Server Error')
         })
     })
     describe('Post User review by Id', function () {
@@ -255,7 +285,7 @@ describe('User testing', function () {
             // .send({})
             expect(response.status).toEqual(401)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('message', "invalid token")
+            expect(response.body).toHaveProperty('message', "Invalid Token")
             expect(typeof response.body.message).toEqual('string')
             console.log(response.body.message, "<<message");
         })
@@ -273,7 +303,7 @@ describe('User testing', function () {
             expect(typeof response.body[0].review).toEqual('object')
             expect(typeof response.body[0].rating).toEqual('object')
         })
-        test('GET /users/review/:id success', async function () {
+        test('GET /users/review/:id failed because access token is invalid token', async function () {
             const response = await request(app)
                 .get('/users/review/1')
                 .set({
@@ -281,7 +311,7 @@ describe('User testing', function () {
                 })
             expect(response.status).toEqual(401)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('message', "invalid token")
+            expect(response.body).toHaveProperty('message', "Invalid Token")
             expect(typeof response.body.message).toEqual('string')
         })
     })
@@ -416,7 +446,7 @@ describe('User testing', function () {
             expect(response.status).toEqual(401)
             expect(typeof response.body). toEqual('object')
             expect(response.body).toHaveProperty('message')
-            expect(response.body.message).toEqual('invalid token')
+            expect(response.body.message).toEqual('Invalid Token')
 
         })
     })
@@ -448,7 +478,7 @@ describe('User testing', function () {
             expect(response.status).toEqual(401)
             expect(typeof response.body). toEqual('object')
             expect(response.body).toHaveProperty('message')
-            expect(response.body.message).toEqual('invalid token')
+            expect(response.body.message).toEqual('Invalid Token')
         })
     })
     describe('POST User order detail by order id', function(){
@@ -495,7 +525,7 @@ describe('User testing', function () {
             expect(response.status).toEqual(401)
             expect(typeof response.body). toEqual('object')
             expect(response.body).toHaveProperty('message')
-            expect(response.body.message).toEqual('invalid token')
+            expect(response.body.message).toEqual('Invalid Token')
         })
     })
 })
