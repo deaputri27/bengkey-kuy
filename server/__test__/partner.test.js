@@ -1,4 +1,4 @@
-/* const { describe, test, expect } = require('@jest/globals')
+const { describe, test, expect } = require('@jest/globals')
 const request = require('supertest')
 const app = require('../app')
 const models = require('../models')
@@ -405,4 +405,17 @@ describe('Partner testing', function () {
             expect(typeof response.body.message).toEqual('string')
         })
     })
-}) */
+    describe('Create Order Detail', function(){
+        test('POST /partners/products success', async function(){
+            const response = await request(app)
+            .post('/partners/products')
+            .set({
+                access_token
+            })
+            .send({"productId": 1, "orderId": 1, "quantity": 3})
+           
+            console.log(response.status, "<<");
+            expect(response.status).toEqual(201)
+        })
+    })
+})
