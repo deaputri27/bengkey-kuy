@@ -7,6 +7,7 @@ async function bulkInsertPartner() {
         restartIdentity: true,
         cascade: true
     })
+    
     const geojson = {
         type: "Point",
         coordinates: ["107.59278847659893", "-6.942981263106864"],
