@@ -376,7 +376,6 @@ describe('Partner testing', function () {
                 .set({
                     access_token
                 })
-
             expect(response.status).toEqual(200)
             expect(typeof response.body).toEqual('object')
             expect(response.body).toHaveProperty('message', "Email sent successfully")
@@ -388,7 +387,6 @@ describe('Partner testing', function () {
                 .set({
                     access_token
                 })
-
             expect(response.status).toEqual(500)
             expect(response.body).toHaveProperty('message', "Internal Server Error")
             expect(typeof response.body.message).toEqual('string')
@@ -399,7 +397,6 @@ describe('Partner testing', function () {
                 .set({
                     // access_token
                 })
-
             expect(response.status).toEqual(401)
             expect(response.body).toHaveProperty('message', "Invalid Token")
             expect(typeof response.body.message).toEqual('string')
