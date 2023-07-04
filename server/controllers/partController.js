@@ -1,11 +1,14 @@
 const { comparePassword } = require('../helper/bcrypt')
 const { signToken } = require('../helper/jwt')
-const { Partner, Product, OrderDetail, User } = require('../models')
 
+const { Product, OrderDetail, User, Order, Partner } = require("../models")
+const nodemailer = require('nodemailer');
+const puppeteer = require('puppeteer');
+const inlineCss = require('inline-css');
 const fs = require('fs');
+const ejs = require('ejs');
 
 class PartControllers {
-
     static async register(req, res, next) {
         try {
             const { partnerName, email, password, phoneNumber, address } = req.body
@@ -15,12 +18,11 @@ class PartControllers {
                 password,
                 phoneNumber,
                 address
-
             })
             res.status(201).json({ message: `user with id ${createPartner.id} and email ${createPartner.partnerName} has been created` })
             // console.log(createUser, "<<<")
         } catch (error) {
-            next(error);
+            // next(error);
             console.log(error);
         }
     }
@@ -93,6 +95,7 @@ class PartControllers {
 
     static async createOrderDetail(req, res, next) {
         try {
+
             const { orderId, productId, quantity } = req.body;
             console.log(req.body, "<<reqboday");
             if (!productId) {
@@ -107,6 +110,7 @@ class PartControllers {
             next(error)
           }
           
+
     }
 
     static async readOrderDetail(req, res, next) {
@@ -135,12 +139,14 @@ class PartControllers {
         try {
 
             const htmlContent = fs.readFileSync('invoice.ejs', 'utf-8');
+            const { orderId } = req.params
 
             const { orderId } = req.params
             const myProducts = await OrderDetail.findAll({
                 attributes: {
                     exclude: ['createdAt', 'updatedAt']
                 }, include: ['Product', 'Order'],
+
                 where: { orderId: orderId }
             })
 
@@ -237,7 +243,6 @@ class PartControllers {
             res.status(500).send('Failed to generate PDF and send email.');
         }
     }
-
 }
 
 module.exports = PartControllers
