@@ -469,7 +469,6 @@ describe('User testing', function () {
                 access_token
             })
             .send({productId: "", quantity: 2})
-
             expect(response.status).toEqual(400)
             expect(typeof response.body). toEqual('object')
             expect(response.body).toHaveProperty('msg')
@@ -481,7 +480,6 @@ describe('User testing', function () {
                 access_token
             })
             .send({productId: 1, quantity: ""})
-
             expect(response.status).toEqual(400)
             expect(typeof response.body). toEqual('object')
             expect(response.body).toHaveProperty('msg')
