@@ -1,5 +1,6 @@
 const { comparePassword } = require('../helper/bcrypt')
 const { signToken } = require('../helper/jwt')
+
 const { Product, OrderDetail, User, Order, Partner } = require("../models")
 const nodemailer = require('nodemailer');
 const puppeteer = require('puppeteer');
@@ -60,53 +61,56 @@ class PartControllers {
         }
     }
 
-    static async loginGoogle(req, res, next) {
-        try {
-            const googleToken = req.headers.google_token
-            console.log(req.headers, "<<<<<");
-            const client = new OAuth2Client(process.env.CLIENTID);
-            const ticket = await client.verifyIdToken({
-              idToken: googleToken,
-              audience: process.env.CLIENTID
-            });
-            const payload = ticket.getPayload();
-            const userid = payload['sub'];
-            const [user, created] = await User.findOrCreate({
-              where: { email: payload.email },
-              defaults: {
-                username: payload.name,
-                password: "deacantik",
-                phoneNumber: "12345",
-                address: "jl.dea",
-              },
-              hooks: false
-            })
-            const access_token = signToken({
-              id: user.id,
-              email: user.email
-            })
-            res.json({ access_token })
-        } catch (error) {
-            next(error);
-            console.log(error);
-        }
-    }
+    // static async loginGoogle(req, res, next) {
+    //     try {
+    //         const googleToken = req.headers.google_token
+    //         console.log(req.headers, "<<<<<");
+    //         const client = new OAuth2Client(process.env.CLIENTID);
+    //         const ticket = await client.verifyIdToken({
+    //           idToken: googleToken,
+    //           audience: process.env.CLIENTID
+    //         });
+    //         const payload = ticket.getPayload();
+    //         const userid = payload['sub'];
+    //         const [user, created] = await User.findOrCreate({
+    //           where: { email: payload.email },
+    //           defaults: {
+    //             username: payload.name,
+    //             password: "deacantik",
+    //             phoneNumber: "12345",
+    //             address: "jl.dea",
+    //           },
+    //           hooks: false
+    //         })
+    //         const access_token = signToken({
+    //           id: user.id,
+    //           email: user.email
+    //         })
+    //         res.json({ access_token })
+    //     } catch (error) {
+    //         next(error);
+    //         console.log(error);
+    //     }
+    // }
 
     static async createOrderDetail(req, res, next) {
         try {
-            const { orderId, products } = req.body
-            products.map((el) => {
-                el.orderId = orderId
-            })
-            
-            await OrderDetail.bulkCreate(products)
-        
-            res.json({ message: "order created"})
 
-        } catch (error) {
+            const { orderId, productId, quantity } = req.body;
+            console.log(req.body, "<<reqboday");
+            if (!productId) {
+              res.status(400).json({ message: "No products provided" });
+              return;
+            }
+            const orderDetail = await OrderDetail.create({orderId,quantity,productId});
+          
+            res.status(201).json(orderDetail);
+          } catch (error) {
             console.log(error);
-            res.status(500).json({ message: "Internal server error" })
-        }
+            next(error)
+          }
+          
+
     }
 
     static async readOrderDetail(req, res, next) {
@@ -123,7 +127,6 @@ class PartControllers {
                 },
                 where: { orderId: orderId }
             })
-            // console.log(myProducts, ".>>>>>>>>>>>>>>>>");
             res.status(200).json(myProducts)
 
         } catch (error) {
@@ -138,6 +141,7 @@ class PartControllers {
             const htmlContent = fs.readFileSync('invoice.ejs', 'utf-8');
             const { orderId } = req.params
 
+            const { orderId } = req.params
             const myProducts = await OrderDetail.findAll({
                 attributes: {
                     exclude: ['createdAt', 'updatedAt']

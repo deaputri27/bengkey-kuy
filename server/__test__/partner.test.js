@@ -4,12 +4,23 @@ const app = require('../app')
 const models = require('../models')
 const { hashPassword } = require('../helper/bcrypt')
 const bulkInsertPartner = require('../helper/PartnerBulkInsert')
+const { signToken } = require('../helper/jwt')
+const bulkInsertCust = require('../helper/UserBulkInsert')
+
+let access_token = ""
 beforeAll(async function(){
-return bulkInsertPartner()
+await bulkInsertCust()
+const partner = await bulkInsertPartner()
+access_token = signToken({
+    id: partner.id,
+    email: partner.email
+})
+
 })
 afterAll(async function() {
     await models.sequelize.close()
 })
+
 describe('Partner testing', function () {
     describe('Register partner', function () {
         test('POST /partners/register success', async function () {
@@ -202,15 +213,96 @@ describe('Partner testing', function () {
             expect(response.body).toHaveProperty('message', "User not found")
             expect(typeof response.body.message).toEqual('string')
         })
+        test('POST /partners/login failed because email is empty', async function(){
+            const response = await request(app)
+            .post('/partners/login')
+            .send({
+                email: "",
+                password: "rahasia",
+            })
+            expect(response.status).toEqual(401)
+            expect(typeof response.body).toEqual('object')
+            expect(response.body).toHaveProperty('message', "Invalid email/password")
+            expect(typeof response.body.message).toEqual('string')
+        })
     })
     describe('Create Order Detail', function(){
-        test('POST /partners/products/:productId success', async function(){
+        test('POST /partners/products success', async function(){
             const response = await request(app)
-            .post('/partners/products/:productId')
+            .post('/partners/products')
             .set({
                 access_token
             })
-            
+            .send({"productId": 1, "orderId": 1, "quantity": 3})
+           
+            console.log(response.body, "<<");
+            expect(response.status).toEqual(201)
+            expect(typeof response.body). toEqual('object')
+            expect(typeof response.body.orderId).toEqual('number')
+            expect(typeof response.body.quantity).toEqual('number')
+            expect(typeof response.body.productId).toEqual('number')
+        })
+        test('POST /partners/products failed because access token is invalid token', async function(){
+            const response = await request(app)
+            .post('/partners/products')
+            .set({
+                // access_token
+            })
+            .send({"productId": 1, "orderId": 1, "quantity": 3})
+           
+            console.log(response.body, "<<");
+            expect(response.status).toEqual(401)
+            expect(typeof response.body). toEqual('object')
+            expect(response.body).toHaveProperty('message')
+            expect(response.body.message).toEqual('invalid token')
+        })
+        test('POST /partners/products failed because productId is empty', async function(){
+            const response = await request(app)
+            .post('/partners/products')
+            .set({
+                access_token
+            })
+            .send({"productId": null, "orderId": 1, "quantity": 3})
+           
+            console.log(response.body, "<<");
+            expect(response.status).toEqual(400)
+            expect(typeof response.body). toEqual('object')
+            expect(response.body).toHaveProperty('message')
+            expect(response.body.message).toEqual('No products provided')
+        })
+    })
+    describe('Read Order Detail Partner', function(){
+        test('GET /partners/products/:orderId success',async function(){
+            const response = await request(app)
+            .get('/partners/products/1')
+            .set({
+                access_token
+            })
+            expect(response.status).toEqual(200)
+            expect(typeof response.body).toEqual('object')
+            expect(typeof response.body[0].orderId).toEqual('number')
+            expect(typeof response.body[0].productId).toEqual('number')
+            expect(typeof response.body[0].quantity).toEqual('number')
+            expect(typeof response.body[0].Product).toEqual('object')
+            expect(typeof response.body[0].Product.productName).toEqual('string')
+            expect(typeof response.body[0].Product.type).toEqual('string')
+            expect(typeof response.body[0].Product.price).toEqual('number')
+            expect(typeof response.body[0].Product.image).toEqual('string')
+            console.log(response.body);
+        })
+        test('GET /partners/products/:orderIdfailed because access token is invalid token', async function(){
+            const response = await request(app)
+            .get('/partners/products/1')
+            .set({
+                // access_token
+            })
+            .send({"productId": 1, "orderId": 1, "quantity": 3})
+           
+            console.log(response.body, "<<");
+            expect(response.status).toEqual(401)
+            expect(typeof response.body). toEqual('object')
+            expect(response.body).toHaveProperty('message')
+            expect(response.body.message).toEqual('invalid token')
         })
     })
 })
