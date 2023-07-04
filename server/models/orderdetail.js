@@ -16,9 +16,30 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   OrderDetail.init({
-    orderId: DataTypes.INTEGER,
-    productId: DataTypes.INTEGER,
-    quantity: DataTypes.INTEGER
+    orderId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate:{
+        notEmpty: { msg: `Order Id is required` },
+        notNull: { msg: `Order Id is invalid` },
+      }
+    },
+    productId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate:{
+        notEmpty: { msg: `Product Id is required` },
+        notNull: { msg: `Product Id is invalid` },
+      }
+    },
+    quantity: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate:{
+        notEmpty: { msg: `Quantity is required` },
+        notNull: { msg: `Quantity Id is invalid` },
+      }
+    }
   }, {
     sequelize,
     modelName: 'OrderDetail',
