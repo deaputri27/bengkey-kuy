@@ -128,8 +128,9 @@ class UserController {
 
     static async createOrder(req, res, next) {
         try {
-            const { problem, lat, lng, car, carType, license } = req.body;
+            const { lat, lng } = req.body;
             const userId = req.user.id
+            // const userId = 1
             const geojson = {
                 type: "Point",
                 coordinates: [lng, lat],
@@ -155,11 +156,11 @@ class UserController {
     static async updateProblem(req, res, next) {
         try {
             const id = req.params.orderId;
-            const { problem, car, carType, license, lat, lng, status, statusPayment } = req.body
-            const order = await Order.update({ problem, car, carType, license, lat, lng, status, statusPayment },
+            const { problem, car, carType, license} = req.body
+            const order = await Order.update({ problem, car, carType, license },
                 { where: { id } }
             )
-            res.status(201).json({ message: `entity with id ${id} updated ` })
+            res.status(200).json({ message: `order with id ${id} is created ` })
         } catch (error) {
             next(error)
         }
@@ -183,7 +184,7 @@ class UserController {
         try {
             const orderId = req.params.orderId
             const { productId, quantity } = req.body
-            const listOrder = await OrderDetail.create({ orderId: orderId, productId, quantity })
+            const listOrder = await OrderDetail.create({ orderId: orderId, productId, quantity})
             console.log(listOrder, "<< ini order id controller");
             
             res.status(201).json(listOrder)
