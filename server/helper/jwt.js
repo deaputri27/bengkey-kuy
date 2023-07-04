@@ -25,7 +25,7 @@ var jwt = require("jsonwebtoken")
 const SECRET_KEY = process.env.SECRET
 // console.log(SECRET_KEY, "<<<<<<<<<<");
 
-
+// console.log({ SECRET_KEY })
 const signToken = (data)=>{
     return jwt.sign(data, SECRET_KEY)
 }

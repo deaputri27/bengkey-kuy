@@ -66,24 +66,24 @@ class PartControllers {
             console.log(req.headers, "<<<<<");
             const client = new OAuth2Client(process.env.CLIENTID);
             const ticket = await client.verifyIdToken({
-                idToken: googleToken,
-                audience: process.env.CLIENTID
+              idToken: googleToken,
+              audience: process.env.CLIENTID
             });
             const payload = ticket.getPayload();
             const userid = payload['sub'];
             const [user, created] = await User.findOrCreate({
-                where: { email: payload.email },
-                defaults: {
-                    username: payload.name,
-                    password: "deacantik",
-                    phoneNumber: "12345",
-                    address: "jl.dea",
-                },
-                hooks: false
+              where: { email: payload.email },
+              defaults: {
+                username: payload.name,
+                password: "deacantik",
+                phoneNumber: "12345",
+                address: "jl.dea",
+              },
+              hooks: false
             })
             const access_token = signToken({
-                id: user.id,
-                email: user.email
+              id: user.id,
+              email: user.email
             })
             res.json({ access_token })
         } catch (error) {
@@ -94,17 +94,14 @@ class PartControllers {
 
     static async createOrderDetail(req, res, next) {
         try {
-
             const { orderId, products } = req.body
-            // console.log(products[0], products[1], ">>>ini req.body");
-
             products.map((el) => {
                 el.orderId = orderId
             })
-
+            
             await OrderDetail.bulkCreate(products)
-
-            res.json({ message: "order created" })
+        
+            res.json({ message: "order created"})
 
         } catch (error) {
             console.log(error);
@@ -139,12 +136,13 @@ class PartControllers {
         try {
 
             const htmlContent = fs.readFileSync('invoice.ejs', 'utf-8');
-
             const { orderId } = req.params
+
             const myProducts = await OrderDetail.findAll({
                 attributes: {
                     exclude: ['createdAt', 'updatedAt']
                 }, include: ['Product', 'Order'],
+
                 where: { orderId: orderId }
             })
 
