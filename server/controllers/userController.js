@@ -300,7 +300,7 @@ class UserController {
         try {
             // distance on meter unit
             const distance = req.query.distance || 10000;
-            const { long, lat } = req.body
+            const { long, lat } = req.query
             // const long = req.query.long || "-6.260576726969987";
             // const lat = req.query.lat || "106.78171420171469";
             let result = await sequelize.query(
@@ -342,10 +342,10 @@ class UserController {
                 };
             });
 
-            console.log(newResult[0].distance / 1000 + "km");
+            // console.log(newResult[0].distance / 1000 + "km");
             res.status(200).json(newResult.sort((a, b) => a.distance - b.distance));
         } catch (error) {
-            // console.log(error);
+            console.log(error);
             next(error)
             // res.status(500).json(error);
         }

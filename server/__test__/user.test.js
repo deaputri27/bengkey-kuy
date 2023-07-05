@@ -568,9 +568,9 @@ describe('User testing', function () {
     //     })
     // })
     describe('GET User distance find store by radius', function(){
-        test.only('GET /users/distance', async function(){
+        test('GET /users/distance', async function(){
             const response = await request(app)
-            .get('/users/distance')
+            .get(`/users/distance?lat=106.98204234&long=-0.123123`)
             .set({
                 access_token
             })
