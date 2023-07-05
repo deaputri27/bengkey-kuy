@@ -20,7 +20,7 @@ async function bulkInsertCust() {
       restartIdentity: true,
       cascade: true,
     });
-  
+
     await Order.destroy({
       truncate: true,
       restartIdentity: true,
@@ -51,7 +51,7 @@ async function bulkInsertCust() {
 
     await Product.bulkCreate(product);
 
-    
+
     user.forEach((el) => {
       el.password = hashPassword(el.password);
   })
@@ -70,9 +70,14 @@ async function bulkInsertCust() {
         `POINT(${el.location.lng} ${el.location.lat})`
       );
     });
-    // await Order.bulkCreate(order)
-   
-    return dataUser
+    await Order.bulkCreate(order)
+
+    return await User.create({
+      username: "deaimut",
+      email: "deacantik@gmail.com",
+      password: "inidea",
+      phoneNumber: "081122333",
+    });
 
   } catch (err) {
     console.log(err, "<======");
