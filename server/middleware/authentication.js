@@ -10,9 +10,9 @@ const authentication = async (req, res, next) => {
         }
         
         const userId = verifyToken(access_token)
-        // console.log(userId);
+        console.log(userId);
         const user = await User.findOne({ where: { email: userId.email } })
-        // console.log(user);
+        console.log(user);
     
         if (!user) {
             throw{name: "JsonWebTokenError"}
