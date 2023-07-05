@@ -360,8 +360,7 @@ class UserController {
             res.status(200).json(newResult.sort((a, b) => a.distance - b.distance));
         } catch (error) {
             console.log(error);
-            // next(error)
-            res.status(500).json(error);
+            next(error)
         }
     }
 
