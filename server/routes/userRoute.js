@@ -8,10 +8,10 @@ router.post('/login', userController.login) //
 // router.post('/google-signin', userController.loginGoogle) //
 
 router.use(authentication)
-router.get("/distance", userController.findStoresByRadius)
+router.get("/distance", userController.findStoresByRadius) //
 
 router.post("/order", userController.createOrder) //
-router.get("/order", userController.getOrderAll)
+router.get("/order", userController.getOrderAll)//
 router.post("/payment-status", userController.paymentStatus)
 router.post("/process-transaction/:orderId", userController.generateMidtransToken)
 router.post('/review/:id', userController.review) //

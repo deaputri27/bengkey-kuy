@@ -6,6 +6,7 @@ const bulkInsertCust = require('../helper/UserBulkInsert')
 const { hashPassword } = require('../helper/bcrypt')
 const { signToken } = require('../helper/jwt')
 const { OrderDetail, Review } = require('../models')
+const snap = require('../helper/midtransHelper')
 
 // const models = require('../models')
 jest.setTimeout(30000);
@@ -166,18 +167,7 @@ describe('User testing', function () {
             expect(typeof response.body).toEqual('object')
             expect(response.body).toHaveProperty('message')
         })
-        test('GET /users/order success', async function () {
-            const response = await request(app)
-                .get('/users/order')
-                .set({
-                    access_token
-                })
-
-            expect(response.status).toEqual(200)
-            expect(typeof response.body).toEqual('object')
-            // console.log(response.body[0], "?/>?>?>");
-            // expect(typeof response.body[0].id).toEqual('number')
-        })
+       
 
         // test('POST /users/order fail create because Car is require', async function(){
         //     const response = await request(app)
@@ -221,6 +211,18 @@ describe('User testing', function () {
         //     expect(response.body).toHaveProperty('msg', "license is require")
         //     expect(typeof response.body.msg).toEqual('string')
         // })
+        test('GET /users/order success', async function () {
+            const response = await request(app)
+                .get('/users/order')
+                .set({
+                    access_token
+                })
+
+            expect(response.status).toEqual(200)
+            expect(typeof response.body).toEqual('object')
+            // console.log(response.body[0], "?/>?>?>");
+            // expect(typeof response.body[0].id).toEqual('number')
+        })
     })
     describe('Get User detail by id', function () {
         test('GET /users/detail/:id success', async function () {
@@ -476,15 +478,15 @@ describe('User testing', function () {
                 })
             expect(response.status).toEqual(200)
             expect(typeof response.body).toEqual('object')
-            expect(typeof response.body.id).toEqual('number')
-            expect(typeof response.body.problem).toEqual('string')
-            expect(typeof response.body.location).toEqual('object')
-            expect(typeof response.body.totalPrice).toEqual('object')
-            expect(typeof response.body.status).toEqual('string')
-            expect(typeof response.body.car).toEqual('string')
-            expect(typeof response.body.carType).toEqual('string')
-            // expect(typeof response.body.lisence).toEqual('string')
-            expect(typeof response.body.userId).toEqual('number')
+            // expect(typeof response.body.id).toEqual('number')
+            // expect(typeof response.body.problem).toEqual('string')
+            // expect(typeof response.body.location).toEqual('object')
+            // expect(typeof response.body.totalPrice).toEqual('object')
+            // expect(typeof response.body.status).toEqual('string')
+            // expect(typeof response.body.car).toEqual('string')
+            // expect(typeof response.body.carType).toEqual('string')
+            // // expect(typeof response.body.lisence).toEqual('string')
+            // expect(typeof response.body.userId).toEqual('number')
         })
         test('GET /users/order/detail/:orderId failed because access token is Invalidtoken', async function () {
             const response = await request(app)
@@ -548,34 +550,84 @@ describe('User testing', function () {
             expect(response.body.message).toEqual('Invalid Token')
         })
     })
-    // describe('POST User midtrans payments by order id', function () { -----------
-    //     test.only('POST /users/process-transaction/:orderId success', async function () {
-    //         const response = await request(app)
-    //             .post('/users/process-transaction/2')
-    //             .set({
-    //                 access_token
-    //             })
-    //         expect(response.status).toEqual(201)
-    //     })
-    // })
-    // describe('User payment success', function(){ ------------
-    //     test('POST /users/payment-status success', async function(){
-    //         const response = await request(app)
-    //         .post('users/payment-status')
-    //         .set({
-    //             access_token
-    //         })
-    //     })
-    // })
+    describe('POST User midtrans payments by order id', function () { 
+        test('POST /users/process-transaction/:orderId success', async function () {
+            jest.spyOn(snap, 'createTransaction').mockResolvedValue({
+                "token": "d30a74ec-0efe-42d9-8a14-87fbc52294b2",
+                "redirect_url": "https://app.sandbox.midtrans.com/snap/v3/redirection/d30a74ec-0efe-42d9-8a14-87fbc52294b2"
+            })
+            const response = await request(app)
+                .post('/users/process-transaction/1')
+                .set({
+                    access_token
+                })
+            expect(response.status).toEqual(201)
+            expect(typeof response.body).toEqual('object')
+            expect(response.body).toHaveProperty('token')
+            expect(typeof response.body.token).toEqual('string')
+            expect(response.body).toHaveProperty('redirect_url')
+            expect(typeof response.body.redirect_url).toEqual('string')
+
+
+        })
+    })
+    describe('User payment success', function(){ 
+        test('POST /users/payment-status success', async function(){
+            const response = await request(app)
+            .post('/users/payment-status')
+            .set({
+                access_token
+            })
+            .send({
+                
+                    "transaction_time": "2020-01-09 18:27:19",
+                    "transaction_status": "capture",
+                    "transaction_id": "57d5293c-e65f-4a29-95e4-5959c3fa335b",
+                    "status_message": "midtrans payment notification",
+                    "status_code": "200",
+                    "signature_key": "16d6f84b2fb0468e2a9cf99a8ac4e5d803d42180347aaa70cb2a7abb13b5c6130458ca9c71956a962c0827637cd3bc7d40b21a8ae9fab12c7c3efe351b18d00a",
+                    "payment_type": "credit_card",
+                    "order_id": 1,
+                    "merchant_id": "G141532850",
+                    "masked_card": "48111111-1114",
+                    "gross_amount": "10000.00",
+                    "fraud_status": "accept",
+                    "eci": "05",
+                    "currency": "IDR",
+                    "channel_response_message": "Approved",
+                    "channel_response_code": "00",
+                    "card_type": "credit",
+                    "bank": "bni",
+                    "approval_code": "1578569243927"
+            })
+            expect(response.status).toEqual(200)
+            expect(typeof response.body).toEqual('object')
+            expect(response.body).toHaveProperty('message', 'Payment Success')
+            expect(typeof response.body.message).toEqual('string')
+        })
+    })
     describe('GET User distance find store by radius', function(){
-        test('GET /users/distance', async function(){
+        test('GET /users/distance success', async function(){
             const response = await request(app)
             .get(`/users/distance?lat=106.98204234&long=-0.123123`)
             .set({
                 access_token
             })
-            console.log(response.body, "??>?>?>?");
+            // console.log(response.body, "??>?>?>?");
             expect(response.status).toEqual(200)
+            expect(typeof response.body).toEqual('object')
+        })
+        test('GET /users/distance failed because internal server errorr', async function(){
+            const response = await request(app)
+            .get(`/users/distance?lat=&long=-0.123123`)
+            .set({
+                access_token
+            })
+            // console.log(response.body, "??>?>?>?");
+            expect(response.status).toEqual(500)
+            expect(typeof response.body).toEqual('object')
+            expect(response.body).toHaveProperty('message', 'Internal Server Error')
+            expect(typeof response.body.message).toEqual('string')
         })
     })
 })

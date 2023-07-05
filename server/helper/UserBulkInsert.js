@@ -72,12 +72,7 @@ async function bulkInsertCust() {
     });
     await Order.bulkCreate(order)
 
-    return await User.create({
-      username: "deaimut",
-      email: "deacantik@gmail.com",
-      password: "inidea",
-      phoneNumber: "081122333",
-    });
+    return dataUser
 
   } catch (err) {
     console.log(err, "<======");
