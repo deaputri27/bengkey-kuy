@@ -58,6 +58,14 @@ module.exports = (sequelize, DataTypes) => {
         notNull: {msg: `Your address is invalid`},
       }
     },
+    imageUrl: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {msg: `Image url is require`},
+        notNull: {msg: `Image url is invalid`},
+      }
+    },
     location: DataTypes.GEOMETRY('POINT')
   }, {
     sequelize,
