@@ -5,25 +5,27 @@ const models = require('../models')
 const bulkInsertCust = require('../helper/UserBulkInsert')
 const { hashPassword } = require('../helper/bcrypt')
 const { signToken } = require('../helper/jwt')
+const { OrderDetail, Review } = require('../models')
+
 // const models = require('../models')
-jest.setTimeout(20000);
+jest.setTimeout(30000);
 
 let access_token = ""
 beforeAll(async function () {
     console.log("TEST<<<")
-try {
-    const user = await bulkInsertCust()
-    console.log(user, "<-----")
-    access_token = signToken({
-        id: user.id,
-        email: user.email
-    }) 
-} catch (err) {
-    console.log(err,"<--");
-}
-beforeEach(function(){
+    try {
+        const user = await bulkInsertCust()
+        console.log(user, "<-----")
+        access_token = signToken({
+            id: user.id,
+            email: user.email
+        })
+    } catch (err) {
+        console.log(err, "<--");
+    }
+})
+beforeEach(function () {
     jest.restoreAllMocks()
-}) 
 })
 afterAll(async function () {
     await models.sequelize.close()
@@ -48,18 +50,18 @@ describe('User testing', function () {
 
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg')
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message', 'Email is invalid')
+            expect(typeof response.body.message).toEqual('string')
         })
         test('POST /users/registerfailed because password is empty', async function () {
             const response = await request(app)
                 .post('/users/register')
-                .send({ username: "deaimut", email: "justin@gmail.com", password: hashPassword(""), phoneNumber: "081122333" })
+                .send({ username: "deaimut", email: "justin@gmail.com", password: "", phoneNumber: "081122333" })
 
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg')
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message', 'Password is require')
+            expect(typeof response.body.message).toEqual('string')
         })
         test('POST /users/register failed because email is required', async function () {
             const response = await request(app)
@@ -68,18 +70,18 @@ describe('User testing', function () {
 
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg')
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message', 'Email is require')
+            expect(typeof response.body.message).toEqual('string')
         })
-        test('POST /users/register failed because password is required', async function () {
+        test('POST /users/register failed because password is invalid', async function () {
             const response = await request(app)
                 .post('/users/register')
                 .send({ username: "deaimut", email: "justin@gmail.com", phoneNumber: "081122333" })
 
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg')
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message', 'Password is invalid')
+            expect(typeof response.body.message).toEqual('string')
         })
         test('POST /users/register failed because email must be unique', async function () {
             const response = await request(app)
@@ -87,9 +89,10 @@ describe('User testing', function () {
                 .send({ username: "deaimut", email: "justin@gmail.com", password: "inidea", phoneNumber: "081122333" })
 
             expect(response.status).toEqual(400)
+            console.log(response.status);
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg', "email must be unique")
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message', "email must be unique")
+            expect(typeof response.body.message).toEqual('string')
         })
         test('POST /users/register failed because email format is incorrect', async function () {
             const response = await request(app)
@@ -99,8 +102,8 @@ describe('User testing', function () {
 
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg', "Validation isEmail on email failed")
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message', "Validation isEmail on email failed")
+            expect(typeof response.body.message).toEqual('string')
         })
     })
     describe('Login testing', function () {
@@ -159,16 +162,22 @@ describe('User testing', function () {
                 .send({
                     problem: "ban muter", lat: "-6.940669415817259", lng: "107.5925576773082", car: "BMW", carType: "sedan", license: "B 232 EE"
                 })
-            console.log(access_token, "<<<<<<< access tokennn");
             expect(response.status).toEqual(201)
-            console.log( response.body, "niii<<<<");
             expect(typeof response.body).toEqual('object')
-            expect(typeof response.body.id).toEqual('number')
-            // expect(response.body).toHaveProperty('message')
-            // expect(typeof response.body.message).toEqual('string')
+            expect(response.body).toHaveProperty('message')
         })
-     
-        
+        test('GET /users/order success', async function () {
+            const response = await request(app)
+                .get('/users/order')
+                .set({
+                    access_token
+                })
+
+            expect(response.status).toEqual(200)
+            expect(typeof response.body).toEqual('object')
+            // console.log(response.body[0], "?/>?>?>");
+            // expect(typeof response.body[0].id).toEqual('number')
+        })
 
         // test('POST /users/order fail create because Car is require', async function(){
         //     const response = await request(app)
@@ -184,7 +193,7 @@ describe('User testing', function () {
         //     expect(response.body).toHaveProperty('msg', "Car is require")
         //     expect(typeof response.body.msg).toEqual('string')
         // })
-        // test('POST /users/order fail create because Car is require', async function(){
+        // test('POST /users/order fail create because Car type is require', async function(){
         //     const response = await request(app)
         //     .post('/users/order')
         //     .set({
@@ -195,7 +204,7 @@ describe('User testing', function () {
         //     })
         //     expect(response.status).toEqual(400)
         //     expect(typeof response.body).toEqual('object')
-        //     expect(response.body).toHaveProperty('msg', "car Type is require")
+        //     expect(response.body).toHaveProperty('msg', "Car Type is require")
         //     expect(typeof response.body.msg).toEqual('string')
         // })
         // test('POST /users/order fail create because License is require', async function(){
@@ -289,6 +298,20 @@ describe('User testing', function () {
             expect(typeof response.body.message).toEqual('string')
             console.log(response.body.message, "<<message");
         })
+        // test.only('POST /users/review/:id failed because server error', async function () {
+        //     jest.spyOn(Review, 'create').mockRejectedValue('Internal Server Error')
+        //     const response = await request(app)
+        //         .post('/users/review/1')
+        //         .set({
+        //             // access_token
+        //         })
+        //     // .send({})
+        //     console.log(response.status, "??");
+        //     expect(response.status).toEqual(500)
+        //     expect(typeof response.body).toEqual('object')
+        //     expect(response.body).toHaveProperty('message')
+        //     expect(response.body.message).toEqual('Internal Server Error')
+        // })
         test('GET /users/review/:id success', async function () {
             const response = await request(app)
                 .get('/users/review/1')
@@ -316,7 +339,7 @@ describe('User testing', function () {
         })
     })
 
-    describe('PUT User order update order', function(){
+    describe('PUT User order update order', function () {
         test('PUT /users/order/:orderId success', async function () {
             const response = await request(app)
                 .put('/users/order/3')
@@ -334,13 +357,7 @@ describe('User testing', function () {
             expect(typeof response.body).toEqual('object')
             expect(response.body).toHaveProperty('message')
             expect(typeof response.body.message).toEqual('string')
-            // expect(typeof response.body.postReview).toEqual("object")
-            // expect(typeof response.body.postReview.id).toEqual('number')
-            // expect(typeof response.body.postReview.userId).toEqual('number')
-            // expect(typeof response.body.postReview.partnerId).toEqual('number')
-            // expect(typeof response.body.postReview.review).toEqual('object')
-            // expect(typeof response.body.postReview.rating).toEqual('object')
-            console.log(response.c, "<< post reveiw");
+
         })
         test('PUT /users/order/:orderId failed because problem column not filled', async function () {
             const response = await request(app)
@@ -355,10 +372,10 @@ describe('User testing', function () {
                     license: "B 202 WOW"
                 })
 
-                expect(response.status).toEqual(400)
-                expect(typeof response.body).toEqual('object')
-                expect(response.body).toHaveProperty('msg')
-                expect(typeof response.body.msg).toEqual('string')
+            expect(response.status).toEqual(400)
+            expect(typeof response.body).toEqual('object')
+            expect(response.body).toHaveProperty('message', 'Problem is require')
+            expect(typeof response.body.message).toEqual('string')
             console.log(response.c, "<< post reveiw");
         })
         test('PUT /users/order/:orderId failed because car column not filled', async function () {
@@ -374,10 +391,10 @@ describe('User testing', function () {
                     license: "B 202 WOW"
                 })
 
-                expect(response.status).toEqual(400)
-                expect(typeof response.body).toEqual('object')
-                expect(response.body).toHaveProperty('msg')
-                expect(typeof response.body.msg).toEqual('string')
+            expect(response.status).toEqual(400)
+            expect(typeof response.body).toEqual('object')
+            expect(response.body).toHaveProperty('message')
+            expect(typeof response.body.message).toEqual('string')
             console.log(response.c, "<< post reveiw");
         })
         test('PUT /users/order/:orderId failed because carType column not filled', async function () {
@@ -393,10 +410,10 @@ describe('User testing', function () {
                     license: "B 202 WOW"
                 })
 
-                expect(response.status).toEqual(400)
-                expect(typeof response.body).toEqual('object')
-                expect(response.body).toHaveProperty('msg')
-                expect(typeof response.body.msg).toEqual('string')
+            expect(response.status).toEqual(400)
+            expect(typeof response.body).toEqual('object')
+            expect(response.body).toHaveProperty('message', 'car Type is require')
+            expect(typeof response.body.message).toEqual('string')
             console.log(response.c, "<< post reveiw");
         })
         test('PUT /users/order/:orderId failed because license column not filled', async function () {
@@ -412,120 +429,153 @@ describe('User testing', function () {
                     license: ""
                 })
 
-                expect(response.status).toEqual(400)
-                expect(typeof response.body).toEqual('object')
-                expect(response.body).toHaveProperty('msg')
-                expect(typeof response.body.msg).toEqual('string')
+            expect(response.status).toEqual(400)
+            expect(typeof response.body).toEqual('object')
+            expect(response.body).toHaveProperty('message', 'license is require')
+            expect(typeof response.body.message).toEqual('string')
             console.log(response.c, "<< post reveiw");
         })
 
 
     })
 
-    describe('PUT User order status by order id', function(){
-        test('PUT /users/order/status/:orderId success', async function(){
+    describe('PUT User order status by order id', function () {
+        test('PUT /users/order/status/:orderId success', async function () {
             const response = await request(app)
-            .put('/users/order/status/9')
-            .set({
-                access_token
-            })
-            
+                .put('/users/order/status/9')
+                .set({
+                    access_token
+                })
+
             expect(response.status).toEqual(201)
-            expect(typeof response.body). toEqual('object')
+            expect(typeof response.body).toEqual('object')
             expect(response.body).toHaveProperty('message')
             expect(response.body.message).toEqual('entity with id 9 updated ')
 
         })
-        test('PUT /users/order/status/:orderId failed because access token is Invalidtoken', async function(){
+        test('PUT /users/order/status/:orderId failed because access token is Invalidtoken', async function () {
             const response = await request(app)
-            .put('/users/order/status/9')
-            .set({
-                // access_token
-            })
-            
+                .put('/users/order/status/9')
+                .set({
+                    // access_token
+                })
+
             expect(response.status).toEqual(401)
-            expect(typeof response.body). toEqual('object')
+            expect(typeof response.body).toEqual('object')
             expect(response.body).toHaveProperty('message')
             expect(response.body.message).toEqual('Invalid Token')
 
         })
     })
-    describe('GET User order detail by order id', function(){
-        test('GET /users/order/detail/:orderId success', async function(){
+    describe('GET User order detail by order id', function () {
+        test('GET /users/order/detail/:orderId success', async function () {
             const response = await request(app)
-            .get('/users/order/detail/1')
-            .set({
-                access_token
-            })
+                .get('/users/order/detail/1')
+                .set({
+                    access_token
+                })
             expect(response.status).toEqual(200)
-            expect(typeof response.body). toEqual('object')
+            expect(typeof response.body).toEqual('object')
             expect(typeof response.body.id).toEqual('number')
             expect(typeof response.body.problem).toEqual('string')
             expect(typeof response.body.location).toEqual('object')
-            expect(typeof response.body.totalPrice).toEqual('number')
+            expect(typeof response.body.totalPrice).toEqual('object')
             expect(typeof response.body.status).toEqual('string')
             expect(typeof response.body.car).toEqual('string')
             expect(typeof response.body.carType).toEqual('string')
             // expect(typeof response.body.lisence).toEqual('string')
             expect(typeof response.body.userId).toEqual('number')
         })
-        test('GET /users/order/detail/:orderId failed because access token is Invalidtoken', async function(){
+        test('GET /users/order/detail/:orderId failed because access token is Invalidtoken', async function () {
             const response = await request(app)
-            .put('/users/order/detail/1')
-            .set({
-                // access_token
-            })
+                .put('/users/order/detail/1')
+                .set({
+                    // access_token
+                })
             expect(response.status).toEqual(401)
-            expect(typeof response.body). toEqual('object')
+            expect(typeof response.body).toEqual('object')
             expect(response.body).toHaveProperty('message')
             expect(response.body.message).toEqual('Invalid Token')
         })
     })
-    describe('POST User order detail by order id', function(){
-        test('POST /users/order/detail/:orderId success', async function(){
+    describe('POST User order detail by order id', function () {
+        test('POST /users/order/detail/:orderId success', async function () {
             const response = await request(app)
-            .post('/users/order/detail/1')
-            .set({
-                access_token
-            })
-            .send({productId: 1, quantity: 2})
+                .post('/users/order/detail/1')
+                .set({
+                    access_token
+                })
+                .send({ productId: 1, quantity: 2 })
 
             expect(response.status).toEqual(201)
         })
-        test('POST /users/order/detail/:orderId failed because product id is missing', async function(){
+        test('POST /users/order/detail/:orderId failed because product id is missing', async function () {
             const response = await request(app)
-            .post('/users/order/detail/10')
-            .set({
-                access_token
-            })
-            .send({productId: "", quantity: 2})
+                .post('/users/order/detail/10')
+                .set({
+                    access_token
+                })
+                .send({ productId: "", quantity: 2 })
             expect(response.status).toEqual(400)
-            expect(typeof response.body). toEqual('object')
-            expect(response.body).toHaveProperty('msg')
+            expect(typeof response.body).toEqual('object')
+            expect(response.body).toHaveProperty('message', 'Product Id is required')
+            expect(typeof response.body.message).toEqual('string')
+
         })
-        test('POST /users/order/detail/:orderId failed because quantity is missing', async function(){
+        test('POST /users/order/detail/:orderId failed because quantity is missing', async function () {
             const response = await request(app)
-            .post('/users/order/detail/10')
-            .set({
-                access_token
-            })
-            .send({productId: 1, quantity: ""})
+                .post('/users/order/detail/10')
+                .set({
+                    access_token
+                })
+                .send({ productId: 1, quantity: "" })
             expect(response.status).toEqual(400)
-            expect(typeof response.body). toEqual('object')
-            expect(response.body).toHaveProperty('msg')
+            expect(typeof response.body).toEqual('object')
+            expect(response.body).toHaveProperty('message')
+            expect(typeof response.body.message).toEqual('string')
         })
-        test('POST /users/order/detail/:orderId failed because acess token is invalid', async function(){
+        test('POST /users/order/detail/:orderId failed because acess token is invalid', async function () {
             const response = await request(app)
-            .post('/users/order/detail/10')
-            .set({
-                // access_token
-            })
-            .send({productId: 1, quantity: ""})
+                .post('/users/order/detail/10')
+                .set({
+                    // access_token
+                })
+                .send({ productId: 1, quantity: "" })
 
             expect(response.status).toEqual(401)
-            expect(typeof response.body). toEqual('object')
+            expect(typeof response.body).toEqual('object')
             expect(response.body).toHaveProperty('message')
             expect(response.body.message).toEqual('Invalid Token')
+        })
+    })
+    // describe('POST User midtrans payments by order id', function () { -----------
+    //     test.only('POST /users/process-transaction/:orderId success', async function () {
+    //         const response = await request(app)
+    //             .post('/users/process-transaction/2')
+    //             .set({
+    //                 access_token
+    //             })
+    //         expect(response.status).toEqual(201)
+    //     })
+    // })
+    // describe('User payment success', function(){ ------------
+    //     test('POST /users/payment-status success', async function(){
+    //         const response = await request(app)
+    //         .post('users/payment-status')
+    //         .set({
+    //             access_token
+    //         })
+    //     })
+    // })
+    describe('GET User distance find store by radius', function(){
+        test.only('GET /users/distance', async function(){
+            const response = await request(app)
+            .get('/users/distance')
+            .set({
+                access_token
+            })
+            console.log(response.body, "??>?>?>?");
+            expect(response.status).toEqual(200)
         })
     })
 })

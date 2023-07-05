@@ -56,6 +56,12 @@ async function bulkInsertCust() {
       el.password = hashPassword(el.password);
   })
 
+  const dataUser =  await User.create({
+    username: "deaimut",
+    email: "deacantik@gmail.com",
+    password: "inidea",
+    phoneNumber: "081122333",
+  });
   await User.bulkCreate(user)
 
     order.forEach((el) => {
@@ -64,15 +70,9 @@ async function bulkInsertCust() {
         `POINT(${el.location.lng} ${el.location.lat})`
       );
     });
-    await Order.bulkCreate(order)
-
-
-    return await User.create({
-      username: "deaimut",
-      email: "deacantik@gmail.com",
-      password: "inidea",
-      phoneNumber: "081122333",
-    });
+    // await Order.bulkCreate(order)
+   
+    return dataUser
 
   } catch (err) {
     console.log(err, "<======");

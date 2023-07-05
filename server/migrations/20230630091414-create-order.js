@@ -37,26 +37,26 @@ module.exports = {
       car: {
         type: Sequelize.STRING,
         allowNull: false,
-      validate: {
-        notEmpty: { msg: `Car is require` },
-        notNull: { msg: `Car is invalid` },
-      }
+        validate: {
+          notEmpty: { msg: `Car is require` },
+          notNull: { msg: `Car is invalid` },
+        }
       },
       carType: {
         type: Sequelize.STRING,
         allowNull: false,
-      validate: {
-        notEmpty: { msg: `carType is require` },
-        notNull: { msg: `carType is invalid` },
-      }
+        validate: {
+          notEmpty: { msg: `carType is require` },
+          notNull: { msg: `carType is invalid` },
+        }
       },
       license: {
         type: Sequelize.STRING,
         allowNull: false,
-      validate: {
-        notEmpty: { msg: `license is require` },
-        notNull: { msg: `license is invalid` },
-      }
+        validate: {
+          notEmpty: { msg: `license is require` },
+          notNull: { msg: `license is invalid` },
+        }
       },
       userId: {
         type: Sequelize.INTEGER,

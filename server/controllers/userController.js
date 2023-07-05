@@ -20,7 +20,7 @@ class UserController {
             // console.log(createUser, "<<<")
         } catch (error) {
             next(error);
-            console.log(error);
+            // console.log(error);
         }
     }
 
@@ -29,17 +29,17 @@ class UserController {
             const { email, password } = req.body
             console.log(req.body, 'req body login userr<<');
             if (!email || !password) {
-                throw { name: "Email and Password is required"} // 401
+                throw { name: "Email and Password is required" } // 401
             }
             const user = await User.findOne({ where: { email } })
             console.log(user, "userr<<");
             if (!user) {
-                throw{ name: "User not found"}
+                throw { name: "User not found" }
             }
             const isValidPassword = comparePassword(password, user.password)
             console.log(isValidPassword, "valid pass<<");
             if (!isValidPassword) {
-                throw{ name: "Invalid email/password"}
+                throw { name: "Invalid email/password" }
             }
             const access_token = signToken({
                 id: user.id,
@@ -141,17 +141,17 @@ class UserController {
                 status: 'inactive',
                 paymentStatus: 'unpaid'
             });
+            console.log("muskkk");
             res.status(201).json({ message: "Order been success to create" });
-        } catch (err) {
-            console.log(err, "<<<<< error");
-            next(err)
+        } catch (error) {
+            // console.log(err, "<<<<< error");
+            next(error)
         }
     }
-
     static async updateProblem(req, res, next) {
         try {
             const id = req.params.orderId;
-            const { problem, car, carType, license} = req.body
+            const { problem, car, carType, license } = req.body
             const order = await Order.update({ problem, car, carType, license },
                 { where: { id } }
             )
@@ -179,12 +179,12 @@ class UserController {
         try {
             const orderId = req.params.orderId
             const { productId, quantity } = req.body
-            const listOrder = await OrderDetail.create({ orderId: orderId, productId, quantity})
+            const listOrder = await OrderDetail.create({ orderId: orderId, productId, quantity })
             console.log(listOrder, "<< ini order id controller");
-            
+
             res.status(201).json(listOrder)
         } catch (error) {
-            console.log(error, "<<<order detail add");
+            // console.log(error, "<<<order detail add");
             next(error)
         }
     }
@@ -201,23 +201,6 @@ class UserController {
         }
     }
 
-    static async createOrder(req, res, next) {
-        try {
-            const { problem, lat, lng, car, carType, license } = req.body
-            // console.log(req.body, ">>>>>>>>>>>");
-            const geojson = {
-                type: 'Point',
-                coordinates: [lng, lat]
-            };
-            const toString = JSON.stringify(geojson)
-            const response = await Order.create({ problem, location: toString, car, carType, userId: req.user.id, license })
-            // console.log(response, ">>>>>>>>>>>>");
-            res.status(201).json(response)
-        } catch (err) {
-            console.log(err);
-            // next(err)
-        }
-    }
 
     static async getOrderAll(req, res, next) {
         try {
@@ -296,19 +279,20 @@ class UserController {
 
     static async paymentStatus(req, res, next) {
         try {
-            // console.log(req.body.transaction_status);
+            console.log(req.body.transaction_status);
             const midtransRespond = req.body.transaction_status
             const id = req.body.order_id
             const totalPrice = req.body.gross_amount
-            // console.log(orderId);
+            console.log(req.body.midtransClient);
 
             if (midtransRespond === "settlement" || midtransRespond === "capture") {
                 await Order.update({ paymentStatus: "isPaid", totalPrice: Number(totalPrice) }, { where: { id } })
                 res.status(200).json("pembayaran berhasil")
             }
-
+            res.status(201).json(midtransRespond)
         } catch (error) {
-            console.log(error);
+            next(error)
+            // console.log(error);
         }
     }
 
@@ -316,10 +300,9 @@ class UserController {
         try {
             // distance on meter unit
             const distance = req.query.distance || 10000;
-            const {long, lat} = req.body
+            const { long, lat } = req.body
             // const long = req.query.long || "-6.260576726969987";
             // const lat = req.query.lat || "106.78171420171469";
-
             let result = await sequelize.query(
                 `select
             id,
@@ -362,8 +345,9 @@ class UserController {
             console.log(newResult[0].distance / 1000 + "km");
             res.status(200).json(newResult.sort((a, b) => a.distance - b.distance));
         } catch (error) {
-            console.log(error);
-            res.status(500).json(error);
+            // console.log(error);
+            next(error)
+            // res.status(500).json(error);
         }
     }
 
@@ -371,7 +355,7 @@ class UserController {
         try {
             const { orderId } = req.params
 
-            const order = await Order.findByPk( orderId, {
+            const order = await Order.findByPk(orderId, {
                 include: {
                     model: Product
                 }
