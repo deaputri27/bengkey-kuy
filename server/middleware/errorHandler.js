@@ -1,7 +1,7 @@
 const errorHandle = (err, req, res, next) => {
     if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
         res.status(400).json({
-            msg: err.errors[0].message
+            message: err.errors[0].message
         })
     } else if (err.name === "Email and Password is required") {
         res.status(400).json({ message: "Email and Password is required" }) //

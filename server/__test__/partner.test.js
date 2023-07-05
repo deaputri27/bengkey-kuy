@@ -59,8 +59,8 @@ describe('Partner testing', function () {
 
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg')
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message')
+            expect(typeof response.body.message).toEqual('string')
         })
         test('POST /partners/register failed because password is empty', async function () {
             const response = await request(app)
@@ -75,8 +75,8 @@ describe('Partner testing', function () {
 
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg')
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message')
+            expect(typeof response.body.message).toEqual('string')
         })
         test('POST /partners/register  failed because partnerName is required', async function () {
             const response = await request(app)
@@ -92,8 +92,8 @@ describe('Partner testing', function () {
 
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg')
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message')
+            expect(typeof response.body.message).toEqual('string')
         })
         test('POST /partners/register  failed because email is required', async function () {
             const response = await request(app)
@@ -109,8 +109,8 @@ describe('Partner testing', function () {
 
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg')
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message')
+            expect(typeof response.body.message).toEqual('string')
         })
         test('POST /partners/register  failed because password is required', async function () {
             const response = await request(app)
@@ -126,8 +126,8 @@ describe('Partner testing', function () {
 
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg')
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message')
+            expect(typeof response.body.message).toEqual('string')
         })
         test('POST /partners/register  failed because phoneNumber is required', async function () {
             const response = await request(app)
@@ -143,8 +143,8 @@ describe('Partner testing', function () {
 
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg')
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message')
+            expect(typeof response.body.message).toEqual('string')
         })
         test('POST /partners/register  failed because address is required', async function () {
             const response = await request(app)
@@ -160,8 +160,8 @@ describe('Partner testing', function () {
 
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg')
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message')
+            expect(typeof response.body.message).toEqual('string')
         })
         test('POST /partners/register  failed because imageUrl is required', async function () {
             const response = await request(app)
@@ -177,8 +177,8 @@ describe('Partner testing', function () {
 
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg')
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message')
+            expect(typeof response.body.message).toEqual('string')
         })
         test('POST /partners/register  failed because email must be unique', async function () {
             const response = await request(app)
@@ -194,8 +194,8 @@ describe('Partner testing', function () {
 
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg', "email must be unique")
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message', "email must be unique")
+            expect(typeof response.body.message).toEqual('string')
         })
         test('POST /partners/register  failed because email format is incorrect', async function () {
             const response = await request(app)
@@ -211,8 +211,8 @@ describe('Partner testing', function () {
 
             expect(response.status).toEqual(400)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('msg', "Validation isEmail on email failed")
-            expect(typeof response.body.msg).toEqual('string')
+            expect(response.body).toHaveProperty('message', "Validation isEmail on email failed")
+            expect(typeof response.body.message).toEqual('string')
         })
 
     })
