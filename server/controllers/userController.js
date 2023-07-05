@@ -48,7 +48,7 @@ class UserController {
             // console.log(access_token, "<<<<fyfy");
             res.json({
                 access_token,
-                email,
+                user
             })
         } catch (error) {
             next(error);
@@ -123,7 +123,7 @@ class UserController {
 
     static async createOrder(req, res, next) {
         try {
-            const { lat, lng } = req.body;
+            const { lat, lng, problem, car, carType, license, partnerId } = req.body;
             const userId = req.user.id
             // const userId = 1
             const geojson = {
@@ -132,34 +132,36 @@ class UserController {
             };
             const toString = JSON.stringify(geojson);
             const response = await Order.create({
-                problem: 'problem',
+                problem,
                 location: toString,
-                car: 'car',
-                carType: 'carType',
-                userId: userId,
-                license: 'license',
+                car,
+                carType,
+                userId,
+                license,
                 status: 'inactive',
-                paymentStatus: 'unpaid'
+                paymentStatus: 'unpaid',
+                partnerId
             });
-            console.log("muskkk");
-            res.status(201).json({ message: "Order been success to create" });
-        } catch (error) {
-            // console.log(err, "<<<<< error");
-            next(error)
+            console.log(response.dataValues.id);
+            res.status(201).json({ response: response.dataValues.id });
+        } catch (err) {
+            console.log(err, "<<<<< error");
+            next(err)
         }
     }
-    static async updateProblem(req, res, next) {
-        try {
-            const id = req.params.orderId;
-            const { problem, car, carType, license } = req.body
-            const order = await Order.update({ problem, car, carType, license },
-                { where: { id } }
-            )
-            res.status(200).json({ message: `order with id ${id} is created ` })
-        } catch (error) {
-            next(error)
-        }
-    }
+
+    // static async updateProblem(req, res, next) {
+    //     try {
+    //         const id = req.params.orderId;
+    //         const { problem, car, carType, license} = req.body
+    //         const order = await Order.update({ problem, car, carType, license },
+    //             { where: { id } }
+    //         )
+    //         res.status(200).json({ message: `order with id ${id} is created ` })
+    //     } catch (error) {
+    //         next(error)
+    //     }
+    // }
 
     static async updateStatus(req, res, next) {
         try {
@@ -201,6 +203,23 @@ class UserController {
         }
     }
 
+    // static async createOrder(req, res, next) {
+    //     try {
+    //         const { problem, lat, lng, car, carType, license } = req.body
+    //         // console.log(req.body, ">>>>>>>>>>>");
+    //         const geojson = {
+    //             type: 'Point',
+    //             coordinates: [lng, lat]
+    //         };
+    //         const toString = JSON.stringify(geojson)
+    //         const response = await Order.create({ problem, location: toString, car, carType, userId: req.user.id, license })
+    //         // console.log(response, ">>>>>>>>>>>>");
+    //         res.status(201).json(response)
+    //     } catch (err) {
+    //         console.log(err);
+    //         // next(err)
+    //     }
+    // }
 
     static async getOrderAll(req, res, next) {
         try {
@@ -279,17 +298,17 @@ class UserController {
 
     static async paymentStatus(req, res, next) {
         try {
-            console.log(req.body.transaction_status);
+            // console.log(req.body.transaction_status);
             const midtransRespond = req.body.transaction_status
             const id = req.body.order_id
             const totalPrice = req.body.gross_amount
-            console.log(req.body.midtransClient);
+            // console.log(orderId);
 
             if (midtransRespond === "settlement" || midtransRespond === "capture") {
                 await Order.update({ paymentStatus: "isPaid", totalPrice: Number(totalPrice) }, { where: { id } })
                 res.status(200).json("pembayaran berhasil")
             }
-            res.status(201).json(midtransRespond)
+
         } catch (error) {
             next(error)
             // console.log(error);
@@ -305,8 +324,7 @@ class UserController {
             // const lat = req.query.lat || "106.78171420171469";
             let result = await sequelize.query(
                 `select
-            id,
-            location
+            *
           from
             "Partners"
           where
@@ -346,8 +364,8 @@ class UserController {
             res.status(200).json(newResult.sort((a, b) => a.distance - b.distance));
         } catch (error) {
             console.log(error);
-            next(error)
-            // res.status(500).json(error);
+            // next(error)
+            res.status(500).json(error);
         }
     }
 
