@@ -70,7 +70,7 @@ async function bulkInsertCust() {
         `POINT(${el.location.lng} ${el.location.lat})`
       );
     });
-    // await Order.bulkCreate(order)
+    await Order.bulkCreate(order)
    
     return dataUser
 
