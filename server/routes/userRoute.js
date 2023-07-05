@@ -17,10 +17,15 @@ router.post("/process-transaction/:orderId", userController.generateMidtransToke
 router.post('/review/:id', userController.review) //
 router.get('/review/:id', userController.getReview) //
 router.get("/detail/:id", userController.getOrderDetail) //
-router.put("/order/:orderId", userController.updateProblem) //
+// router.put("/order/:orderId", userController.updateProblem)
 router.put("/order/status/:orderId", userController.updateStatus)//
 router.get("/order/detail/:orderId", userController.getOrder)//
 
-router.post("/order/detail/:orderId", userController.addOrderDetail) //
+router.post("/order/detail/:orderId", userController.addOrderDetail)
+
+// router.put("/order/:orderId", userController.updateProblem)
+
+router.get("/order/detail/:orderId", userController.getOrder)
+router.put("/order/status/:orderId", userController.updateStatus)
 
 module.exports = router

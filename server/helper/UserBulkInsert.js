@@ -20,7 +20,7 @@ async function bulkInsertCust() {
       restartIdentity: true,
       cascade: true,
     });
-  
+
     await Order.destroy({
       truncate: true,
       restartIdentity: true,
@@ -51,7 +51,7 @@ async function bulkInsertCust() {
 
     await Product.bulkCreate(product);
 
-    
+
     user.forEach((el) => {
       el.password = hashPassword(el.password);
   })
@@ -71,7 +71,7 @@ async function bulkInsertCust() {
       );
     });
     await Order.bulkCreate(order)
-   
+
     return dataUser
 
   } catch (err) {

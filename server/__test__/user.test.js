@@ -118,7 +118,7 @@ describe('User testing', function () {
             console.log(response.body, "access tokennnnnn niii<<<<");
             expect(typeof response.body).toEqual('object')
             expect(typeof response.body.access_token).toEqual('string')
-            expect(typeof response.body.email).toEqual('string')
+            expect(typeof response.body.user).toEqual('object')
         })
         test('POST /users/login failed because wrong password input', async function () {
             const response = await request(app)
@@ -161,13 +161,13 @@ describe('User testing', function () {
                     access_token
                 })
                 .send({
-                    problem: "ban muter", lat: "-6.940669415817259", lng: "107.5925576773082", car: "BMW", carType: "sedan", license: "B 232 EE"
+                    partnerId: 1, problem: "ban muter", lat: "-6.940669415817259", lng: "107.5925576773082", car: "BMW", carType: "sedan", license: "B 232 EE"
                 })
             expect(response.status).toEqual(201)
             expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('message')
+            expect(response.body).toHaveProperty('response')
         })
-       
+
 
         // test('POST /users/order fail create because Car is require', async function(){
         //     const response = await request(app)
@@ -176,7 +176,7 @@ describe('User testing', function () {
         //         access_token
         //     })
         //     .send({
-        //         problem: "ban muter", lat: "-6.940669415817259",lng: "107.5925576773082", car: "", carType: "sedan", license: "B 232 EE" 
+        //         problem: "ban muter", lat: "-6.940669415817259",lng: "107.5925576773082", car: "", carType: "sedan", license: "B 232 EE"
         //     })
         //     expect(response.status).toEqual(400)
         //     expect(typeof response.body).toEqual('object')
@@ -190,7 +190,7 @@ describe('User testing', function () {
         //         access_token
         //     })
         //     .send({
-        //         problem: "ban muter", lat: "-6.940669415817259",lng: "107.5925576773082", car: "BMW", carType: "", license: "B 232 EE" 
+        //         problem: "ban muter", lat: "-6.940669415817259",lng: "107.5925576773082", car: "BMW", carType: "", license: "B 232 EE"
         //     })
         //     expect(response.status).toEqual(400)
         //     expect(typeof response.body).toEqual('object')
@@ -204,7 +204,7 @@ describe('User testing', function () {
         //         access_token
         //     })
         //     .send({
-        //         problem: "ban muter", lat: "-6.940669415817259",lng: "107.5925576773082", car: "BMW", carType: "bus", license: "" 
+        //         problem: "ban muter", lat: "-6.940669415817259",lng: "107.5925576773082", car: "BMW", carType: "bus", license: ""
         //     })
         //     expect(response.status).toEqual(400)
         //     expect(typeof response.body).toEqual('object')
@@ -341,105 +341,104 @@ describe('User testing', function () {
         })
     })
 
-    describe('PUT User order update order', function () {
-        test('PUT /users/order/:orderId success', async function () {
-            const response = await request(app)
-                .put('/users/order/3')
-                .set({
-                    access_token
-                })
-                .send({
-                    problem: "ini masalah",
-                    car: "BMW",
-                    carType: "brum-brum",
-                    license: "B 202 WOW"
-                })
+    // describe('PUT User order update order', function () {
+    //     test('PUT /users/order/:orderId success', async function () {
+    //         const response = await request(app)
+    //             .put('/users/order/3')
+    //             .set({
+    //                 access_token
+    //             })
+    //             .send({
+    //                 problem: "ini masalah",
+    //                 car: "BMW",
+    //                 carType: "brum-brum",
+    //                 license: "B 202 WOW"
+    //             })
 
-            expect(response.status).toEqual(200)
-            expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('message')
-            expect(typeof response.body.message).toEqual('string')
+    //         expect(response.status).toEqual(200)
+    //         expect(typeof response.body).toEqual('object')
+    //         expect(response.body).toHaveProperty('message')
+    //         expect(typeof response.body.message).toEqual('string')
 
-        })
-        test('PUT /users/order/:orderId failed because problem column not filled', async function () {
-            const response = await request(app)
-                .put('/users/order/3')
-                .set({
-                    access_token
-                })
-                .send({
-                    problem: "",
-                    car: "BMW",
-                    carType: "brum-brum",
-                    license: "B 202 WOW"
-                })
+    //     })
+    //     test('PUT /users/order/:orderId failed because problem column not filled', async function () {
+    //         const response = await request(app)
+    //             .put('/users/order/3')
+    //             .set({
+    //                 access_token
+    //             })
+    //             .send({
+    //                 problem: "",
+    //                 car: "BMW",
+    //                 carType: "brum-brum",
+    //                 license: "B 202 WOW"
+    //             })
 
-            expect(response.status).toEqual(400)
-            expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('message', 'Problem is require')
-            expect(typeof response.body.message).toEqual('string')
-            console.log(response.c, "<< post reveiw");
-        })
-        test('PUT /users/order/:orderId failed because car column not filled', async function () {
-            const response = await request(app)
-                .put('/users/order/3')
-                .set({
-                    access_token
-                })
-                .send({
-                    problem: "ada masalah",
-                    car: "",
-                    carType: "brum-brum",
-                    license: "B 202 WOW"
-                })
+    //         expect(response.status).toEqual(400)
+    //         expect(typeof response.body).toEqual('object')
+    //         expect(response.body).toHaveProperty('message', 'Problem is require')
+    //         expect(typeof response.body.message).toEqual('string')
+    //         console.log(response.c, "<< post reveiw");
+    //     })
+    //     test('PUT /users/order/:orderId failed because car column not filled', async function () {
+    //         const response = await request(app)
+    //             .put('/users/order/3')
+    //             .set({
+    //                 access_token
+    //             })
+    //             .send({
+    //                 problem: "ada masalah",
+    //                 car: "",
+    //                 carType: "brum-brum",
+    //                 license: "B 202 WOW"
+    //             })
 
-            expect(response.status).toEqual(400)
-            expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('message')
-            expect(typeof response.body.message).toEqual('string')
-            console.log(response.c, "<< post reveiw");
-        })
-        test('PUT /users/order/:orderId failed because carType column not filled', async function () {
-            const response = await request(app)
-                .put('/users/order/3')
-                .set({
-                    access_token
-                })
-                .send({
-                    problem: "ada masalah",
-                    car: "BMW",
-                    carType: "",
-                    license: "B 202 WOW"
-                })
+    //         expect(response.status).toEqual(400)
+    //         expect(typeof response.body).toEqual('object')
+    //         expect(response.body).toHaveProperty('message')
+    //         expect(typeof response.body.message).toEqual('string')
+    //         console.log(response.c, "<< post reveiw");
+    //     })
+    //     test('PUT /users/order/:orderId failed because carType column not filled', async function () {
+    //         const response = await request(app)
+    //             .put('/users/order/3')
+    //             .set({
+    //                 access_token
+    //             })
+    //             .send({
+    //                 problem: "ada masalah",
+    //                 car: "BMW",
+    //                 carType: "",
+    //                 license: "B 202 WOW"
+    //             })
 
-            expect(response.status).toEqual(400)
-            expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('message', 'car Type is require')
-            expect(typeof response.body.message).toEqual('string')
-            console.log(response.c, "<< post reveiw");
-        })
-        test('PUT /users/order/:orderId failed because license column not filled', async function () {
-            const response = await request(app)
-                .put('/users/order/3')
-                .set({
-                    access_token
-                })
-                .send({
-                    problem: "ada masalah",
-                    car: "BMW",
-                    carType: "brum-brum",
-                    license: ""
-                })
+    //         expect(response.status).toEqual(400)
+    //         expect(typeof response.body).toEqual('object')
+    //         expect(response.body).toHaveProperty('message', 'car Type is require')
+    //         expect(typeof response.body.message).toEqual('string')
+    //         console.log(response.c, "<< post reveiw");
+    //     })
+    //     test('PUT /users/order/:orderId failed because license column not filled', async function () {
+    //         const response = await request(app)
+    //             .put('/users/order/3')
+    //             .set({
+    //                 access_token
+    //             })
+    //             .send({
+    //                 problem: "ada masalah",
+    //                 car: "BMW",
+    //                 carType: "brum-brum",
+    //                 license: ""
+    //             })
 
-            expect(response.status).toEqual(400)
-            expect(typeof response.body).toEqual('object')
-            expect(response.body).toHaveProperty('message', 'license is require')
-            expect(typeof response.body.message).toEqual('string')
-            console.log(response.c, "<< post reveiw");
-        })
+    //         expect(response.status).toEqual(400)
+    //         expect(typeof response.body).toEqual('object')
+    //         expect(response.body).toHaveProperty('message', 'license is require')
+    //         expect(typeof response.body.message).toEqual('string')
+    //         console.log(response.c, "<< post reveiw");
+    //     })
 
-
-    })
+    // })
 
     describe('PUT User order status by order id', function () {
         test('PUT /users/order/status/:orderId success', async function () {
@@ -550,7 +549,7 @@ describe('User testing', function () {
             expect(response.body.message).toEqual('Invalid Token')
         })
     })
-    describe('POST User midtrans payments by order id', function () { 
+    describe('POST User midtrans payments by order id', function () {
         test('POST /users/process-transaction/:orderId success', async function () {
             jest.spyOn(snap, 'createTransaction').mockResolvedValue({
                 "token": "d30a74ec-0efe-42d9-8a14-87fbc52294b2",
@@ -571,7 +570,7 @@ describe('User testing', function () {
 
         })
     })
-    describe('User payment success', function(){ 
+    describe('User payment success', function(){
         test('POST /users/payment-status success', async function(){
             const response = await request(app)
             .post('/users/payment-status')
@@ -579,7 +578,7 @@ describe('User testing', function () {
                 access_token
             })
             .send({
-                
+
                     "transaction_time": "2020-01-09 18:27:19",
                     "transaction_status": "capture",
                     "transaction_id": "57d5293c-e65f-4a29-95e4-5959c3fa335b",
