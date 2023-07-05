@@ -95,15 +95,15 @@ class PartControllers {
     static async createOrderDetail(req, res, next) {
         try {
 
-            const { orderId, productId, quantity } = req.body;
-            console.log(req.body, "<<reqboday");
-            if (!productId) {
-                throw{ name: "No products provided"}
-            }
-            const orderDetail = await OrderDetail.create({orderId,quantity,productId});
-          
-            res.status(201).json(orderDetail);
+            const { orderId, products } = req.body
+            products.map((el) => {
+                el.orderId = orderId
+            })
+            
+            await OrderDetail.bulkCreate(products)
+            res.json({ message: "order created"})
           } catch (error) {
+            // console.log(error);
             next(error)
           }
           

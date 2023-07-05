@@ -1,8 +1,13 @@
-const { User, Partner, Order } = require('../models')
+const { User, Partner, Order,Product } = require('../models')
 const { hashPassword } = require('./bcrypt')
 
 async function bulkInsertPartner() {
     await Partner.destroy({
+        truncate: true,
+        restartIdentity: true,
+        cascade: true
+    })
+    await Product.destroy({
         truncate: true,
         restartIdentity: true,
         cascade: true
@@ -37,6 +42,20 @@ async function bulkInsertPartner() {
             license: "B 2045 HUG"
         }
     )
+    await Product.bulkCreate([
+        {
+            "productName": "Ban bulet",
+            "type": "Ecopia",
+            "price": 750000,
+            "image": "https://s.garasi.id/q80/store_products/06f12a60-21e3-4313-893d-764cf7b7dfb6.jpeg"
+        },
+        {
+            "productName": "Ban A T",
+            "type": "Off Road",
+            "price": 1600000,
+            "image": "https://dcadprod.azureedge.net/b2c-experience-bfg-production/attachments/cjwgdhelv012n0oqk4x1doquo-bfgoodrich-all-terrain-sup-t-a-ko2-sup-home-background-md.one-third.png"
+        },
+    ])
     return dataPartner
 }
 

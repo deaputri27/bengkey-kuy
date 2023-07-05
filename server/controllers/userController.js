@@ -1,6 +1,6 @@
 const { comparePassword } = require('../helper/bcrypt')
-const { signToken } = require('../helper/jwt')
-const midtransClient = require('midtrans-client');
+const { signToken } = require('../helper/jwt');
+const snap = require('../helper/midtransHelper');
 const { User, Order, OrderDetail, Review, Product } = require('../models')
 const { sequelize } = require("../models");
 const geolib = require("geolib");
@@ -196,7 +196,7 @@ class UserController {
             console.log(response, "<<< response");
             res.status(200).json(response)
         } catch (err) {
-            console.log(err);
+            // console.log(err);
             next(err)
         }
     }
@@ -208,7 +208,8 @@ class UserController {
             console.log(response);
             res.status(200).json(response)
         } catch (err) {
-            console.log(err);
+            next(err)
+            // console.log(err);
         }
     }
 
@@ -217,11 +218,7 @@ class UserController {
             const { orderId } = req.params
             const findUser = await User.findByPk(req.user.id)
 
-            let snap = new midtransClient.Snap({
-                isProduction: false,
-                serverKey: process.env.MIDTRANS_SERVER_KEY,
-            });
-
+         
             const myProducts = await OrderDetail.findAll({
                 attributes: {
                     exclude: ['createdAt', 'updatedAt']
@@ -279,20 +276,19 @@ class UserController {
 
     static async paymentStatus(req, res, next) {
         try {
-            console.log(req.body.transaction_status);
+            console.log(req.body);
             const midtransRespond = req.body.transaction_status
             const id = req.body.order_id
             const totalPrice = req.body.gross_amount
-            console.log(req.body.midtransClient);
 
             if (midtransRespond === "settlement" || midtransRespond === "capture") {
                 await Order.update({ paymentStatus: "isPaid", totalPrice: Number(totalPrice) }, { where: { id } })
-                res.status(200).json("pembayaran berhasil")
+                res.status(200).json({message: "Payment Success"})
             }
-            res.status(201).json(midtransRespond)
+            res.status(200).json(midtransRespond)
         } catch (error) {
             next(error)
-            // console.log(error);
+            console.log(error);
         }
     }
 
