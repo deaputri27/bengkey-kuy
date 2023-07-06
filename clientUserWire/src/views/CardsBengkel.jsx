@@ -11,20 +11,16 @@ import { BASE_URL } from '../../server';
 
 
 export default function CardsBengkel({ navigation }) {
-  const datas = useStore(state => [
+  const datas = useStore(state => 
     state.datas
-  ])
+  )
   const [partnerId,setPartnerId] = useStore(state => [
     state.partnerId,
     state.updatePartnerId
   ])
 
-
-
-
-  const dataMitra = [].concat(...datas)
-
   const CustomCard = ({ item }) => {
+
     return (
       <View style={styles.containerCustomCard}>
         <Image source={{ uri: item.imageUrl }} style={styles.image} />
@@ -45,7 +41,8 @@ export default function CardsBengkel({ navigation }) {
             icon={() => <MaterialCommunityIcons name="message-text" size={20} color="white" />}
             style={styles.button}
             onPress={() => {
-              console.log('chat');
+              setPartnerId(item.id)
+              navigation.navigate('Chat')
             }}
           />
         </View>
@@ -53,7 +50,7 @@ export default function CardsBengkel({ navigation }) {
         <Text ></Text>
         {/* </View> */}
         <View style={styles.translucentBoxAdress}>
-          <Text style={styles.translucentText}>{item.address.length > 20 ? item.address.slice(0, 10) + '...' : item.address}</Text>
+          <Text style={styles.translucentText}>{item?.address?.length > 20 ? item?.address?.slice(0, 10) + '...' : item?.address}</Text>
         </View>
         <View style={styles.translucentBoxRatings}>
           <Text style={styles.translucentText}>Ratings</Text>
@@ -93,7 +90,7 @@ export default function CardsBengkel({ navigation }) {
           <View style={styles.flatListContainer}>
             <FlatList
               horizontal={false}
-              data={dataMitra}
+              data={datas}
               renderItem={renderArticels}
               keyExtractor={(item, idx) => idx}
             />

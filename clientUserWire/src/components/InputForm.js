@@ -11,10 +11,11 @@ import axios from 'axios';
 const { height, width } = Dimensions.get('window');
 
 const InputForm = () => {
+  const dataOrder = useStore(state => state.dataOrder)
+  const setDataOrder = useStore(state => state.updateOrder)
   const userLoc = useStore(state => state.userLoc)
   const partnerId = useStore(state => state.partnerId)
 
-  console.log(partnerId, "<<<ini partner id");
   const [data, setData] = useState({})
 
   const datasForm = { ...data, ...userLoc, partnerId }
@@ -24,12 +25,11 @@ const InputForm = () => {
       [field]: value
     }));
   };
-  console.log(data, "<<<<<<<<<<<");
+
   const navigation = useNavigation();
 
   const handleFormSubmit = async () => {
     try {
-      console.log(datasForm,"ini datas form");
 
       const token = await AsyncStorage.getItem('access_token')
 
@@ -41,8 +41,12 @@ const InputForm = () => {
           'access_token': token
         }
       })
-      // console.log(object);
-      navigation.navigate('Profile');
+      await AsyncStorage.setItem('orderId', response.data.id.toString())
+      await AsyncStorage.setItem('status', response.data.paymentStatus)
+      // setDataOrder({ id: response.data.id, status: response.data.paymentStatus })
+      // console.log(response.data.id);
+      // console.log();
+      navigation.navigate('TrackOrderDetail');
     } catch (err) {
       console.log(err);
     }
@@ -54,7 +58,7 @@ const InputForm = () => {
   const handleGoBack = () => {
     navigation.goBack();
   };
-
+  console.log(dataOrder);
   return (
     <ImageBackground
       source={{
@@ -159,6 +163,7 @@ const styles = StyleSheet.create({
     width: '90%',
     height: height,
     display: 'flex',
+    marginLeft:20
 
   },
   header: {

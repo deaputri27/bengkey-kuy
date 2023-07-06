@@ -1,14 +1,9 @@
 import { DeviceEventEmitter, View, Text, StyleSheet, Button } from 'react-native'
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import MapViewDirections from 'react-native-maps-directions';
 import React, { useEffect, useRef, useState } from 'react'
-import { GOOGLE_KEY } from '../../key';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Svg, { Circle, Path } from 'react-native-svg';
 import * as Location from "expo-location"
-import { initializeApp } from 'firebase/app' // utk mulainya
-import { getFirestore, addDoc, updateDoc, collection, doc, setDoc, deleteDoc, onSnapshot, getDoc } from "firebase/firestore" // utk fire store databasenya
-import image from '../icons/iconmitra.png'
 import mark from '../icons/iconmark.png'
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,6 +14,7 @@ import { BASE_URL } from '../../server';
 const LOCATION_DISTANCE_THRESHOLD = 1
 
 const MapComponent = ({ navigation }) => {
+    let token
     const [datas, setDatas] = useStore(state => [
         state.datas,
         state.updateDatas
@@ -48,30 +44,6 @@ const MapComponent = ({ navigation }) => {
 
 
     useEffect(() => {
-
-        // const idDriver = "01827373"
-        // const app = initializeApp(firebaseConfig)
-        // const db = getFirestore(app)
-        // const connection = collection(db, "final-phase-bengkel")
-
-
-        // onSnapshot(connection, async () => {
-        //     try {
-        //         const docSnapshot = await getDoc(doc(connection, idDriver));
-        //         if (docSnapshot.exists()) {
-        //             console.log(docSnapshot.data());
-        //             setLocation(prev => ({
-        //                 ...prev, pickupCords: {
-        //                     latitude: docSnapshot.data().latitude,
-        //                     longitude: docSnapshot.data().longitude
-        //                 }
-        //             }))
-        //         }
-        //     } catch (err) {
-        //         console.log(err);
-        //     }
-        // })
-        // let subscription
         (async () => {
             const { status } = await Location.requestForegroundPermissionsAsync()
             if (status !== "granted") {
@@ -98,12 +70,10 @@ const MapComponent = ({ navigation }) => {
                 return newRegion
             })
 
-            const token = await AsyncStorage.getItem('access_token')
-            console.log(token);
+            token = await AsyncStorage.getItem('access_token')
 
             setLoading(true)
-            setUserLoc({lat:latitude,lng:longitude})
-            // console.log(latitude,longitude);
+            setUserLoc({ lat: latitude, lng: longitude })
             const data = await axios({
                 url: `${BASE_URL}/distance`,
                 method: 'post',
@@ -118,14 +88,13 @@ const MapComponent = ({ navigation }) => {
 
             setLoading(false)
             setDatas(data?.data)
-
         }
         )()
 
 
         DeviceEventEmitter.addListener("search_location", (eventData) => {
 
-            setTimeout(() => {
+            setTimeout(async () => {
                 setRegionUser(prev => {
                     const newRegion = {
                         ...prev,
@@ -133,9 +102,29 @@ const MapComponent = ({ navigation }) => {
                         longitude: eventData.longitude
                     }
                     mapRef.current?.animateToRegion(newRegion, 2000)
-
                     return newRegion
                 })
+
+
+                token = await AsyncStorage.getItem('access_token')
+
+                // setLoading(true)
+                setUserLoc({ lat: eventData.latitude, lng: eventData.longitude })
+                const data = await axios({
+                    url: `${BASE_URL}/distance`,
+                    method: 'post',
+                    data: {
+                        lat: eventData.latitude,
+                        long: eventData.longitude
+                    },
+                    headers: {
+                        'access_token': token
+                    }
+                })
+
+                // setLoading(false)
+                setDatas(data?.data)
+
             }, 2000);
         })
 
@@ -169,7 +158,24 @@ const MapComponent = ({ navigation }) => {
                 mapRef.current?.animateToRegion(newRegion, 2000)
                 return newRegion
             })
+            token = await AsyncStorage.getItem('access_token')
 
+            // setLoading(true)
+            setUserLoc({ lat: latitude, lng: longitude })
+            const data = await axios({
+                url: `${BASE_URL}/distance`,
+                method: 'post',
+                data: {
+                    lat: latitude,
+                    long: longitude
+                },
+                headers: {
+                    'access_token': token
+                }
+            })
+
+            // setLoading(false)
+            setDatas(data?.data)
         })()
     }
 
@@ -185,25 +191,6 @@ const MapComponent = ({ navigation }) => {
         })
     }
 
-    //////////////////////////////// ini firebase //////////////////////////////////
-    // const firebaseConfig = {
-    //     apiKey: "AIzaSyA3a63q1F5cOBFF_GF4ssElkOu-Ix2-7vY",
-    //     authDomain: "bengkel-kuy-final-project.firebaseapp.com",
-    //     projectId: "bengkel-kuy-final-project",
-    //     storageBucket: "bengkel-kuy-final-project.appspot.com",
-    //     messagingSenderId: "558920179990",
-    //     appId: "1:558920179990:web:cfce73cb86f6bbb8933037"
-    // };
-
-
-    // driver idnya di hardcoded dulu
-
-
-    // useEffect(() => {
-    //     mapRef.current?.animateToRegion(regionMitra, 2000)
-    // }, [regionMitra])
-    // console.log(regionUser, "<<<regionUser");
-    // console.log(userLoc, "<<<");
     return (
         <>
             {loading ? <Text>Test</Text> : <View style={styles.container}>
@@ -222,53 +209,8 @@ const MapComponent = ({ navigation }) => {
                         provider={PROVIDER_GOOGLE}
                         minZoomLevel={13}
                         maxZoomLevel={20}
-
-                    // ref={mapRef}
-                    // style={styles.map}
-                    // initialRegion={region}
-                    //   minZoomLevel={16}
-                    //   maxZoomLevel={16}
-                    //   onPress={(e) => {
-                    //     const newRegion = {
-                    //       ...region,
-                    //       ...e.nativeEvent.coordinate
-                    //     }
-                    //     setRegion(newRegion)
-                    //     mapRef.current?.animateToRegion(newRegion, 3000)
-                    //   }}
-                    //   onRegionChangeComplete={(region) => setRegion({
-                    //     ...region,
-                    //     latitudeDelta: region.latitudeDelta,
-                    //     longitudeDelta: region.longitudeDelta,
-                    //   })}
                     >
-                        {/* <Marker image={image} coordinate={location.pickupCords} /> */}
                         <Marker image={mark} coordinate={regionUser} />
-                        {/* <MapViewDirections
-                        resetOnChange={false}
-                        origin={location.pickupCords}
-                        destination={location.dropLocationCors}
-                        apikey={GOOGLE_KEY}
-                        strokeWidth={3}
-                        strokeColor="red"
-                        optimizeWaypoints={true}
-                        onReady={result => {
-                            if (!mapReady) {
-                                mapRef.current.fitToCoordinates(result.coordinates, {
-                                    edgePadding: {
-                                        right: 30,
-                                        bottom: 300,
-                                        left: 30,
-                                        top: 100
-                                    }
-                                })
-                                setMapReady(true)
-                            }
-                        }}
-                        onError={(errorMessage) => {
-                            console.log(errorMessage)
-                        }}
-                    /> */}
                     </MapView>
                     <View style={styles.bottomCard}>
                         <TouchableOpacity style={styles.inputStyle} onPress={onPressLocation}>

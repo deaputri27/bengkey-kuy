@@ -12,7 +12,7 @@ export default function Profile({ navigation }) {
         React.useCallback(() => {
             setTimeout(() => {
                 console.log('timeout', navigation);
-                navigation.navigate("TrackOrderDetail");
+                // navigation.navigate("TrackOrderDetail");
             }, 3000);
         }, [navigation])
     );

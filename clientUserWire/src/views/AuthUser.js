@@ -40,7 +40,7 @@ export default function AuthUser({ navigation }) {
 
             await AsyncStorage.setItem('access_token', responseData.access_token)
             await AsyncStorage.setItem('username', responseData.user.username)
-            // await AsyncStorage.setItem('user_id', responseData.user.id.toString())
+            await AsyncStorage.setItem('userId', responseData.user.id.toString())
             await navigation.navigate('Tabs')
             setData({email: "", password: ""})
         } catch (err) {
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         fontSize: 20,
         fontWeight: '600',
-        color: 'white',
+        color: '#FFF',
         // marginTop: 13,
         // letterSpacing: 0.5
     },

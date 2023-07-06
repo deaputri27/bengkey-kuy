@@ -4,10 +4,11 @@ import Svg, { Path } from 'react-native-svg';
 import CarouselUser from '../components/CarouselUser';
 const { height, width } = Dimensions.get('window');
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import useStore from '../store/store';
 
 
 export default function Home({ navigation }) {
-
+    let id = 0
     const [datas, setDatas] = useState({
         username: '',
         user_id: ''
@@ -15,13 +16,19 @@ export default function Home({ navigation }) {
 
     useEffect(() => {
         (async () => {
+            id = await AsyncStorage.getItem('userId')
+            const orderId = await AsyncStorage.getItem('orderId')
+            const status = await AsyncStorage.getItem('status')
+            if (orderId != 0 && status === "unpaid") {
+                navigation.navigate('TrackOrderDetail')
+            }
+            console.log(orderId,status,"<<<<<<<<<<<<<<<<");
             setDatas({
                 username: await AsyncStorage.getItem('username'),
                 user_id: await AsyncStorage.getItem('user_id')
             })
         })()
     }, [])
-    console.log(datas.username);
     const logout = async () => {
         try {
             await AsyncStorage.clear()
@@ -31,8 +38,6 @@ export default function Home({ navigation }) {
         }
     }
 
-    // const username = async () => await AsyncStorage.getItem('username')
-    // console.log(username, "<<<<");
     const articels = [
         { id: 1, text: "Layanan Cepat dan Efisien untuk Tambal Ban Terdekat", uri: 'https://montiro.id/_ipx/_/https://api.montiro.id/storage/images/konten/tvbCs6OPUW6ocBvOJZaG.jpeg', textStyle: { marginBottom: 300 } },
         { id: 2, text: '9 Cara Perawatan Mobil yang Bisa Dilakukan Sendiri', uri: 'https://montiro.id/_ipx/_/https://api.montiro.id/storage/images/konten/d2L7hADbnHpzFVmwFcRD.jpeg' },
@@ -74,6 +79,7 @@ export default function Home({ navigation }) {
 
         </Pressable>
     );
+    console.log(id, "<<<<< ini ID dari home");
 
 
     return (
@@ -102,7 +108,7 @@ export default function Home({ navigation }) {
                         </Svg>
 
                         <Text style={styles.text}>Hi, {datas.username}</Text>
-                        <Svg onPress={logout} style={{ position:'absolute',height: 40, width: 50, marginLeft:'75%', marginTop: 18 }}
+                        <Svg onPress={logout} style={{ position: 'absolute', height: 40, width: 50, marginLeft: '75%', marginTop: 18 }}
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
                             viewBox="0 0 24 24"
@@ -140,23 +146,9 @@ export default function Home({ navigation }) {
                             <Text style={styles.textIcon}>Emergency</Text>
                         </View>
                         <View style={{ flex: 1, flexDirection: 'column' }}>
-                            <Svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="black"
-                                strokeWidth={1.5}
-                                style={{ height: 50, width: 50, alignSelf: 'center', marginTop: 5 }}
-                            >
-                                <Path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
-                                />
-                            </Svg>
-                            <Text style={styles.textIcon}>Home Service</Text>
-                        </View>
-                        <View style={{ flex: 1, flexDirection: 'column' }}>
+                        <Pressable onPress={() => {
+                                navigation.navigate('History');
+                            }}>
                             <Svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
@@ -172,6 +164,7 @@ export default function Home({ navigation }) {
                                     d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
                                 />
                             </Svg>
+                            </Pressable>
                             <Text style={styles.textIcon}>History</Text>
                         </View>
                     </View>

@@ -36,7 +36,7 @@ class PartControllers {
                 throw { name: "Email and Password is required"} // 401
             }
             const user = await Partner.findOne({ where: { email } })
-            console.log(user, "userr<<");
+            // console.log(user, "userr<<");
             if (!user) {
                 throw{ name: "User not found"}
             }
@@ -49,10 +49,15 @@ class PartControllers {
                 id: user.id,
                 email: user.email
             })
-            // console.log(access_token, "<<<<fyfy");
+            // console.log(user.dataValues.location, "<<<<fyfy");
+            // const userPassword = user.dataValues.password
+            const userData = user.dataValues
+            delete userData.password
+            console.log(userData, "ini inputannya ><><><><");
             res.json({
                 access_token,
                 email,
+                userData
             })
         } catch (error) {
             next(error);
@@ -238,6 +243,17 @@ class PartControllers {
             next(error)
             // console.error(error);
             // res.status(500).send('Failed to generate PDF and send email.');
+        }
+    }
+
+    static async getAllorder(req, res, next){
+        try {
+            const partnerId = req.partner.id
+            const response = await Order.findAll({where: {id: partnerId}})
+            console.log(response);
+            res.status(200).json(response)
+        } catch (err) {
+            console.log(err);
         }
     }
 }

@@ -9,6 +9,7 @@ router.post('/login', partControllers.login)//
 
 router.use(authenticationPartner)
 
+router.get('/products', partControllers.getAllorder)//
 router.post('/products', partControllers.createOrderDetail)//
 router.get('/products/:orderId', partControllers.readOrderDetail)
 
