@@ -18,7 +18,6 @@ module.exports = {
         'ST_GeomFromText',
         `POINT(${el.location.lng} ${el.location.lat})`
       ),
-      el.status = 
       el.createdAt = el.updatedAt = new Date()
     })
     await queryInterface.bulkInsert("Orders", orders, {})
